@@ -6,7 +6,7 @@
 ##
 
 CC := epiclang
-CFLAGS = -Wall -Wextra -Werror -I. -g3
+CFLAGS = -Wall -Wextra -Werror -I.
 
 SRC = src/main.c \
 	src/my_lib.c \
