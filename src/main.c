@@ -21,8 +21,6 @@ void my_putstr(char *str)
 
 void free_array(char **arg)
 {
-    for (int i = 0; arg[i] != NULL; i++)
-        printf("%s\n", arg[i]);
     if (arg == NULL)
         return;
     for (int i = 0; arg[i] != NULL; i++) {
@@ -83,6 +81,7 @@ int main(int argc, char **argv, char **env)
         if (getline(&line, &line_length, stdin) == -1)
             break;
         copy_env = process_line(line, copy_env, &last_return);
+        line = NULL;
     }
     free(line);
     free_array(copy_env);
