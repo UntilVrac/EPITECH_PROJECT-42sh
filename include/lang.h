@@ -30,7 +30,7 @@ static const msg_name_t DEFAULT_MESSAGES[] = {
     "Segmentation fault",
     "Segmentation fault (core dumped)",
     "Floating exception (core dumped)",
-    "No home directory.",
+    "No $home variable set.",
     "Not a directory.",
     "Permission denied.",
     "Variable name must begin with a letter.",
