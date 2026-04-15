@@ -67,17 +67,17 @@ char *get_path_to_simlink(const char **env)
     char *path = NULL;
 
     if (line == NULL)
-        return ENV_DIR_PATH;
+        return strdup("/");
     if (*line == NULL)
-        return ENV_DIR_PATH;
+        return strdup("/");
     splited = my_split_str((const char *)(*line), '=');
     if (splited == NULL)
-        return ENV_DIR_PATH;
+        return strdup("/");
     if (my_word_array_len((const char **)(splited)) < 2) {
         free_array(splited);
-        return ENV_DIR_PATH;
+        return strdup("/");
     }
-    path = my_str_n_concat(3, splited[1], "/", ENV_DIR_NAME);
+    path = my_str_concat(splited[1], "/");
     free_array(splited);
     return path;
 }
@@ -96,8 +96,8 @@ static void create_simlink(const char *path_to_env_dir,
     int fd = open(TMP_FILE, O_WRONLY | O_CREAT, 666);
 
     if (fd > 0) {
-        // dup2(fd, 1);
-        // dup2(fd, 2);
+        dup2(fd, 1);
+        dup2(fd, 2);
     }
     printf("execve\n");
     execve(LN, (char *const[5]){"ln", "-sf", (char *const)(path_to_env_dir),

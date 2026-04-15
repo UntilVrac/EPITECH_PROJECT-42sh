@@ -87,9 +87,13 @@ static void put_error(err_msg_t err_msg, const char *msg_data[2],
 {
     char *prefix = (char *)(msg_data[0]);
     const char *lang = msg_data[1];
-    char *lang_file = get_lang_file(lang, path_to_lang);
-    char *msg = NULL;
+    char *lang_file = NULL;
+    char *msg = my_str_n_concat(3, path_to_lang, ENV_DIR_NAME, "/");
 
+    free(path_to_lang);
+    path_to_lang = msg;
+    printf("path : '%s'\n", path_to_lang);
+    lang_file = get_lang_file(lang, path_to_lang);
     free(path_to_lang);
     if (lang_file == NULL)
         return print_message(prefix, DEFAULT_MESSAGES[err_msg]);
