@@ -1,0 +1,12 @@
+LANG=it
+CMD_NOT_FOUND=Comando non trovato
+EXP_SYNTAX=Errore di sintassi nell'espressione
+TOO_M_ARGS=Troppi argomenti
+TOO_F_ARGS=Troppi pochi argomenti
+NO_SUCH_FILE_OR_DIR=No such file or directory
+NO_SUCH_FILE=No such file
+NULL_CMD=Comando nullo non corretto
+SEG_FAULT=Errore di accesso al segmento di memoria
+SEG_FAULT_CD=Errore di accesso al segmento di memoria (creato file core)
+FLOAT_POINT_EXCEPT=Errore di calcolo in virgola mobile (creato file core)
+DEFAULT=Errore

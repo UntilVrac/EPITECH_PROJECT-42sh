@@ -5,7 +5,8 @@
 ** Functions for managing the enviroment variables
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 char *build_env_variable(char *name, char *value)
 {
@@ -37,15 +38,11 @@ int get_env_var_index(char **copy_env, char *name)
     return -1;
 }
 
-int is_name_valid(char *name)
+int is_name_valid(char *name, const char **env)
 {
-    const char *error1 = "setenv: Variable name must begin with a letter.\n";
-    const char *error2 = "setenv: Variable name must contain "
-        "alphanumeric characters.\n";
-
     if (!((name[0] >= 'a' && name[0] <= 'z') ||
             (name[0] >= 'A' && name[0] <= 'Z'))) {
-        write(2, error1, my_strlen((char *)error1));
+        print_error("setenv", VAR_NAME_M_BEG_W_LETTER, env);
         return -1;
     }
     for (int i = 0; name[i] != '\0'; i++) {
@@ -53,7 +50,7 @@ int is_name_valid(char *name)
                 (name[i] >= 'A' && name[i] <= 'Z') ||
                 (name[i] >= '0' && name[i] <= '9') ||
                 (name[i] == '_'))) {
-            write(2, error2, my_strlen((char *)error2));
+            print_error("setenv", VAR_NAME_M_CON_ALPHNUM_CHARS, env);
             return -1;
         }
     }

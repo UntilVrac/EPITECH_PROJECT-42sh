@@ -5,7 +5,8 @@
 ** Input parsing and command execution flow
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 static int count(char *str, char *separator)
 {
@@ -94,11 +95,9 @@ static char **check_builtins(char *command, char **copy_env,
 char **parse_command(char *command, char **copy_env,
     int *last_return, char **commands_array)
 {
-    const char *error = "Invalid null command.\n";
-
     if (my_strchr(command, '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
-            write(2, error, my_strlen((char *)error));
+            print_error(NULL, NULL_CMD, (const char **)(copy_env));
             *last_return = 1;
             return copy_env;
         }

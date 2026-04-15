@@ -5,7 +5,8 @@
 ** Functions for moving through directories
 */
 
-#include "../include/functions.h"
+#include "lang.h"
+#include "functions.h"
 
 static char *get_cd_path(char **arg, char **copy_env)
 {
@@ -15,7 +16,7 @@ static char *get_cd_path(char **arg, char **copy_env)
     if (!path || my_strcmp(path, "~") == 0) {
         index = get_env_var_index(copy_env, "HOME");
         if (index == -1) {
-            write(2, "cd: No home directory.\n", 23);
+            print_error("cd", NO_HOME_DIR, (const char **)(copy_env));
             return NULL;
         }
         return &copy_env[index][5];
@@ -23,7 +24,7 @@ static char *get_cd_path(char **arg, char **copy_env)
     if (my_strcmp(path, "-") == 0) {
         index = get_env_var_index(copy_env, "OLDPWD");
         if (index == -1) {
-            write(2, ": No such file or directory.\n", 29);
+            print_error("", NO_SUCH_FILE_OR_DIR, (const char **)(copy_env));
             return NULL;
         }
         return &copy_env[index][7];
@@ -52,29 +53,23 @@ static char **update_pwd(char **copy_env)
     return copy_env;
 }
 
-static int check_if_directory(char *path)
+static int check_if_directory(char *path, const char **env)
 {
     struct stat st;
-    const char *error = ": Not a directory.\n";
 
     if (stat(path, &st) == 0 && S_ISDIR(st.st_mode) == 0) {
-        write(2, path, my_strlen(path));
-        write(2, error, my_strlen((char *)error));
+        print_error(path, NOT_A_DIR, env);
         return -1;
     }
     return 0;
 }
 
-static void display_correct_message(char *path)
+static void display_correct_message(char *path, const char **env)
 {
-    const char *error1 = ": No such file or directory.\n";
-    const char *error2 = ": Permission denied.\n";
-
-    write(2, path, my_strlen(path));
     if (access(path, F_OK) == -1)
-        write(2, error1, my_strlen((char *)error1));
+        print_error((const char *)(path), NO_SUCH_FILE_OR_DIR, env);
     else if (access(path, X_OK) == -1)
-        write(2, error2, my_strlen((char *)error2));
+        print_error((const char *)(path), PERM_DENIED, env);
 }
 
 char **execute_cd(char **arg, char **copy_env, int *last_return)
@@ -82,14 +77,14 @@ char **execute_cd(char **arg, char **copy_env, int *last_return)
     char *path = get_cd_path(arg, copy_env);
     char old_cwd[1024];
 
-    if (!path || check_if_directory(path) == -1) {
+    if (!path || check_if_directory(path, (const char **)(copy_env)) == -1) {
         *last_return = 1;
         return copy_env;
     }
     if (getcwd(old_cwd, sizeof(old_cwd)) == NULL)
         return copy_env;
     if (chdir(path) == -1) {
-        display_correct_message(path);
+        display_correct_message(path, (const char **)(copy_env));
         *last_return = 1;
     } else {
         copy_env = update_oldpwd(copy_env, old_cwd);

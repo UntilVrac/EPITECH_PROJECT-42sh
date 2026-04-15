@@ -5,7 +5,8 @@
 ** Builtin functions
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 void print_env(char **copy_env, int *last_return)
 {
@@ -23,16 +24,14 @@ void exit_program(char **arg, char **copy_env, int last_return)
     exit(last_return);
 }
 
-static int fail_setenv(char **arg, int *last_return)
+static int fail_setenv(char **arg, int *last_return, const char **env)
 {
-    const char *error = "setenv: Too many arguments.\n";
-
     if (arg[1] && arg[2] && arg[3]) {
-        write(2, error, my_strlen((char *)error));
+        print_error("setenv", TOO_M_ARGS, env);
         *last_return = 1;
         return -1;
     }
-    if (is_name_valid(arg[1]) == -1) {
+    if (is_name_valid(arg[1], env) == -1) {
         *last_return = 1;
         return -1;
     }
@@ -44,7 +43,7 @@ char **execute_setenv(char **arg, char **copy_env, int *last_return)
     char *new_var = NULL;
     int index = 0;
 
-    if (fail_setenv(arg, last_return) == -1)
+    if (fail_setenv(arg, last_return, (const char **)(copy_env)) == -1)
         return copy_env;
     *last_return = 0;
     new_var = build_env_variable(arg[1], arg[2]);
@@ -59,11 +58,10 @@ char **execute_setenv(char **arg, char **copy_env, int *last_return)
 
 char **execute_unsetenv(char **arg, char **copy_env, int *last_return)
 {
-    const char *error = "unsetenv: Too few arguments.\n";
     int index = 0;
 
     if (!arg[1]) {
-        write(2, error, my_strlen((char *)error));
+        print_error("unsetenv", TOO_F_ARGS, (const char **)(copy_env));
         *last_return = 1;
         return copy_env;
     }

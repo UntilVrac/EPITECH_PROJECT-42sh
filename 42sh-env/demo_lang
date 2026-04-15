@@ -1,0 +1,9 @@
+LANG=uk
+CMD_NOT_FOUND=Buongiorno
+EXP_SYNTAX=Guten tag
+TOO_M_ARGS=Buenos Dias
+TOO_F_ARGS=Dobroho ranku
+NO_SUCH_FILE_OR_DIR=No such file or directory
+NO_SUCH_FILE=No such file
+NULL_CMD=Commande nulle invalide
+DEFAULT=Pomylka

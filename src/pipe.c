@@ -5,7 +5,8 @@
 ** Pipe handling
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 static int skip_spaces_tabs(char *line, int i)
 {
@@ -63,16 +64,15 @@ static void exec_pipe_child(char *command, int in_fd,
     char *command_copy = my_strdup(command);
     char **arg = NULL;
     char *path = NULL;
-    const char *error = ": Command not found.\n";
 
     redirect_pipe_fd(in_fd, out_fd);
-    if (apply_redirection(command_copy) == -1)
+    if (apply_redirection(command_copy, (const char **)(copy_env)) == -1)
         exit(1);
     arg = transform_to_string_array(command_copy, " \t");
     path = get_command_path(arg[0], copy_env);
     if (path == NULL) {
-        write(2, arg[0], my_strlen(arg[0]));
-        write(2, error, my_strlen((char *)error));
+        print_error((const char *)(arg[0]), CMD_NOT_FOUND,
+            (const char **)(copy_env));
         exit(1);
     }
     execute_child(arg, path, copy_env);
@@ -111,7 +111,8 @@ static pid_t exec_fork_pipe(char **commands, int index, int *prev_fd,
     return pid;
 }
 
-static void wait_for_all(pid_t last_pid, int *last_return, int nb_commands)
+static void wait_for_all(pid_t last_pid, int *last_return, int nb_commands,
+    const char **env)
 {
     int status1 = 0;
     int status2 = 0;
@@ -121,7 +122,7 @@ static void wait_for_all(pid_t last_pid, int *last_return, int nb_commands)
     if (WIFEXITED(status1))
         *last_return = WEXITSTATUS(status1);
     else if (WIFSIGNALED(status1))
-        handle_signal_error(status1, last_return);
+        handle_signal_error(status1, last_return, env);
     for (int i = 0; i < nb_commands - 1; i++) {
         status2 = 0;
         wait(&status2);
@@ -150,7 +151,7 @@ void handle_pipe(char *line, char **copy_env, int *last_return)
         nb_commands++;
     for (int i = 0; commands[i] != NULL; i++)
         last_pid = exec_fork_pipe(commands, i, &prev_fd, copy_env);
-    wait_for_all(last_pid, last_return, nb_commands);
+    wait_for_all(last_pid, last_return, nb_commands, (const char **)(copy_env));
     free_array(commands);
     free(copy_line);
 }

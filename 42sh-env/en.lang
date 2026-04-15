@@ -1,0 +1,12 @@
+LANG=en
+CMD_NOT_FOUND=Command not found
+EXP_SYNTAX=Expression syntax
+TOO_M_ARGS=Too many arguments
+TOO_F_ARGS=Too few arguments
+NO_SUCH_FILE_OR_DIR=No such file or directory
+NO_SUCH_FILE=No such file
+NULL_CMD=Invalid null command
+SEG_FAULT=Segmentation fault
+SEG_FAULT_CD=Segmentation fault (core dumped)
+FLOAT_POINT_EXCEPT=Floating exception (core dumped)
+DEFAULT=Error

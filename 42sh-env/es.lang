@@ -1,0 +1,12 @@
+LANG=es
+CMD_NOT_FOUND=Comando no encontrado
+EXP_SYNTAX=Sintaxis de la expresión
+TOO_M_ARGS=Demasiados argumentos
+TOO_F_ARGS=Demasiado pocos argumentos
+NO_SUCH_FILE_OR_DIR=No such file or directory
+NO_SUCH_FILE=No such file
+NULL_CMD=Comando nulo inválido
+SEG_FAULT=Error de segmentación
+SEG_FAULT_CD=Error de segmentación (se ha creado un `core')
+FLOAT_POINT_EXCEPT=Excepción de punto flotante (se ha creado un `core')
+DEFAULT=Error

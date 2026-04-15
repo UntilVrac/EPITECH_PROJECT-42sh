@@ -5,7 +5,8 @@
 ** Execution and path handling functions
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 static char *get_path(char **copy_env)
 {
@@ -75,51 +76,52 @@ char *get_command_path(char *command, char **copy_env)
     return check_path(directors, command, path_copy);
 }
 
-void handle_signal_error(int status, int *last_return)
+void handle_signal_error(int status, int *last_return, const char **env)
 {
     int sig = WTERMSIG(status);
     char *message = strsignal(sig);
-    const char *dumped = " (core dumped)";
 
     if (sig == SIGINT) {
         write(1, "\n", 1);
         *last_return = 1;
         return;
     }
-    if (sig == SIGSEGV)
-        write(2, "Segmentation fault", 18);
-    else if (message)
-        write(2, message, my_strlen(message));
-    if (WCOREDUMP(status))
-        write(2, dumped, my_strlen((char *)dumped));
-    write(2, "\n", 1);
+    if (WCOREDUMP(status) && sig == SIGSEGV)
+        print_error(NULL, SEG_FAULT, env);
+    else if (sig == SIGSEGV)
+        print_error(NULL, SEG_FAULT_CD, env);
+    if (sig != SIGSEGV && message) {
+        fprintf(stderr, "%s", message);
+        if (WCOREDUMP(status))
+            fprintf(stderr, " (core dumped)");
+        fprintf(stderr, "\n");
+    }
     *last_return = 128 + sig;
 }
 
 void execute_child(char **arg, char *path, char **copy_env)
 {
-    const char *error1 = ": Permission denied.\n";
-    const char *error2 = ": Command not found.\n";
-    const char *error3 = ": Exec format error. Binary file not executable.\n";
-
     signal(SIGINT, SIG_DFL);
     if (execve(path, arg, copy_env) == -1) {
-        write(2, arg[0], my_strlen(arg[0]));
         if (errno == ENOEXEC) {
-            write(2, error3, my_strlen((char *)error3));
+            print_error((const char *)(arg[0]), NOT_EXEC,
+                (const char **)(copy_env));
             free(path);
             exit(1);
         }
         if (errno == EACCES)
-            write(2, error1, my_strlen((char *)error1));
+            print_error((const char *)(arg[0]), PERM_DENIED,
+                (const char **)(copy_env));
         else
-            write(2, error2, my_strlen((char *)error2));
+            print_error((const char *)(arg[0]), CMD_NOT_FOUND,
+                (const char **)(copy_env));
         free(path);
         exit(1);
     }
 }
 
-static void execute_parent(pid_t pid, char *path, int *last_return)
+static void execute_parent(pid_t pid, char *path, int *last_return,
+    const char **env)
 {
     int status = 0;
 
@@ -127,7 +129,7 @@ static void execute_parent(pid_t pid, char *path, int *last_return)
     if (WIFEXITED(status)) {
         *last_return = WEXITSTATUS(status);
     } else if (WIFSIGNALED(status)) {
-        handle_signal_error(status, last_return);
+        handle_signal_error(status, last_return, (const char **)(env));
     }
     free(path);
 }
@@ -135,7 +137,7 @@ static void execute_parent(pid_t pid, char *path, int *last_return)
 static void execute_redirection_child(char *command_copy, char **arg,
     char *path, char **copy_env)
 {
-    if (apply_redirection(command_copy) == -1)
+    if (apply_redirection(command_copy, (const char **)(copy_env)) == -1)
         exit(1);
     free_array(arg);
     arg = transform_to_string_array(command_copy, " \t");
@@ -154,15 +156,15 @@ void execute_command(char *command, char **copy_env, int *last_return)
     pid_t pid = 0;
 
     if (path == NULL) {
-        write(2, arg[0], my_strlen(arg[0]));
-        write(2, ": Command not found.\n", 21);
+        print_error((const char *)(arg[0]), CMD_NOT_FOUND,
+            (const char **)(copy_env));
         *last_return = 1;
     } else {
         pid = fork();
         if (pid == 0)
             execute_redirection_child(command_copy, arg, path, copy_env);
         else
-            execute_parent(pid, path, last_return);
+            execute_parent(pid, path, last_return, (const char **)(copy_env));
     }
     free(tmp_copy);
     free_array(arg);

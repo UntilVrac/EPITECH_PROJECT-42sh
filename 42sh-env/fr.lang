@@ -1,0 +1,12 @@
+LANG=fr
+CMD_NOT_FOUND=Commande introuvable
+EXP_SYNTAX=Syntaxe de l'expression
+TOO_M_ARGS=Trop d'arguments
+TOO_F_ARGS=Trop peu d'arguments
+NO_SUCH_FILE_OR_DIR=Aucun fichier ou dossier de ce nom
+NO_SUCH_FILE=Aucun fichier de ce nom
+NULL_CMD=Commande nulle invalide
+SEG_FAULT=Incident de segmentation
+SEG_FAULT_CD=Incident de segmentation (core dumped)
+FLOAT_POINT_EXCEPT=Exception de calcul en virgule flottante (core dumped)
+DEFAULT=Erreur

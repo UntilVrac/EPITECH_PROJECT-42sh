@@ -1,0 +1,12 @@
+LANG=de
+CMD_NOT_FOUND=Befehl nicht gefunden
+EXP_SYNTAX=Ausdruck nicht korrekt
+TOO_M_ARGS=Zu viele Argumente
+TOO_F_ARGS=Zu wenig Argumente
+NO_SUCH_FILE_OR_DIR=No such file or directory
+NO_SUCH_FILE=No such file
+NULL_CMD=Ungütiger leerer Befehl
+SEG_FAULT=Speicherschutzverletzung
+SEG_FAULT_CD=Speicherschutzverletzung (core dumped)
+FLOAT_POINT_EXCEPT=Fließkommafehler (core dumped)
+DEFAULT=Fehler

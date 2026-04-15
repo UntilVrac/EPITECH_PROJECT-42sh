@@ -5,7 +5,8 @@
 ** Minishell 2 project
 */
 
-#include "../include/functions.h"
+#include "functions.h"
+#include "lang.h"
 
 void my_putchar(char c)
 {
@@ -73,6 +74,7 @@ int main(int argc, char **argv, char **env)
     size_t line_length = 0;
     int last_return = 0;
 
+    init_env_dir((const char **)(copy_env));
     (void)argc;
     (void)argv;
     signal(SIGINT, SIG_IGN);
