@@ -40,9 +40,9 @@ void display_custom_prompt(char **copy_env)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         if (home && strncmp((const char *)(cwd), (const char *)(home),
                 strlen((const char *)(home))) == 0)
-            printf("~%s", cwd + strlen((const char *)(home)));
+            printf("\e[1m~%s\e[0m", cwd + strlen((const char *)(home)));
         else
-            printf("%s", cwd);
+            printf("\e[1m%s\e[0m", cwd);
     }
     printf("> ");
 }
