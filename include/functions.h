@@ -19,14 +19,6 @@
     #define SEMICLON ";"
     #include <fcntl.h>
 
-// my_lib.c
-int my_strlen(char *s);
-char *my_strdup(char *src);
-int my_strcmp(char *str1, char *str2);
-int my_strncmp(char *str1, char *str2, int n);
-// my_lib2.c
-char *my_strcat(char *dest, char *src);
-char *my_strchr(char *str, char c);
 // builtins.c
 void print_env(char **env, int *last_return);
 void exit_program(char **arg, char **copy_env, int last_return);

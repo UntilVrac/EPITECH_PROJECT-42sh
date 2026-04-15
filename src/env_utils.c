@@ -5,6 +5,7 @@
 ** Functions for managing the enviroment variables
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -14,25 +15,26 @@ char *build_env_variable(char *name, char *value)
     char *new_var = NULL;
 
     if (value)
-        value_length = my_strlen(value);
-    new_var = malloc(my_strlen(name) + value_length + 2);
+        value_length = strlen((const char *)(value));
+    new_var = malloc(strlen((const char *)(name)) + value_length + 2);
     if (!new_var) {
         perror("malloc error build_env_variable");
         return NULL;
     }
     new_var[0] = '\0';
-    my_strcat(new_var, name);
-    my_strcat(new_var, "=");
+    strcat(new_var, (const char *)(name));
+    strcat(new_var, "=");
     if (value)
-        my_strcat(new_var, value);
+        strcat(new_var, (const char *)(value));
     return new_var;
 }
 
 int get_env_var_index(char **copy_env, char *name)
 {
     for (int i = 0; copy_env[i] != NULL; i++) {
-        if (my_strncmp(copy_env[i], name, my_strlen(name)) == 0 &&
-            copy_env[i][my_strlen(name)] == '=')
+        if (strncmp((const char *)(copy_env[i]), (const char *)(name),
+                strlen((const char *)(name))) == 0 &&
+            copy_env[i][strlen((const char *)(name))] == '=')
             return i;
     }
     return -1;

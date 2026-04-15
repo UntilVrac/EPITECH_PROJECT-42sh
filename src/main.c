@@ -5,6 +5,7 @@
 ** Minishell 2 project
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -43,7 +44,7 @@ static char **get_env_copy(char **env)
         exit(84);
     }
     for (int j = 0; j < i; j++) {
-        copy_env[j] = my_strdup(env[j]);
+        copy_env[j] = strdup((const char *)(env[j]));
     }
     copy_env[i] = NULL;
     return copy_env;
@@ -52,7 +53,7 @@ static char **get_env_copy(char **env)
 static char **process_line(char *line, char **copy_env, int *last_return)
 {
     char **commands = NULL;
-    int len = my_strlen(line);
+    int len = strlen((const char *)(line));
 
     if (len > 0 && line[len - 1] == '\n')
         line[len - 1] = '\0';

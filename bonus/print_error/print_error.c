@@ -92,7 +92,6 @@ static void put_error(err_msg_t err_msg, const char *msg_data[2],
 
     free(path_to_lang);
     path_to_lang = msg;
-    printf("path : '%s'\n", path_to_lang);
     lang_file = get_lang_file(lang, path_to_lang);
     free(path_to_lang);
     if (lang_file == NULL)
@@ -131,7 +130,6 @@ void print_error(const char *prefix, err_msg_t err_msg, const char **env)
     char *msg[2] = {(char *)(prefix), NULL};
     char *env_dir_path = get_path_to_simlink(env);
 
-    printf("env dir : '%s'\n", env_dir_path);
     if (env_line == NULL)
         return put_error(err_msg, (const char **)(msg), env_dir_path);
     splited = my_split_str(*env_line, '=');

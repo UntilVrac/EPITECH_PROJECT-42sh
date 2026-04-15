@@ -5,6 +5,7 @@
 ** Redirections handling
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -68,7 +69,7 @@ static char *get_filename(char *str)
 
     while (str[i] == ' ' || str[i] == '\t')
         i++;
-    filename = my_strdup(&str[i]);
+    filename = strdup((const char *)(&str[i]));
     if (!filename)
         return NULL;
     for (int j = 0; filename[j] != '\0'; j++)
@@ -99,7 +100,7 @@ static int get_output_fd(char *ptr, char **filename)
 
 static int output_redirection(char *command)
 {
-    char *ptr = my_strchr(command, '>');
+    char *ptr = strchr((const char *)(command), '>');
     char *filename = NULL;
     int fd = 0;
 
@@ -131,7 +132,7 @@ static int get_input_fd(char *ptr, char **filename)
 
 static int input_redirection(char *command)
 {
-    char *ptr = my_strchr(command, '<');
+    char *ptr = strchr((const char *)(command), '<');
     char *filename = NULL;
     int fd = 0;
 

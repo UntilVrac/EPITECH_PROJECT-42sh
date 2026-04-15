@@ -5,6 +5,7 @@
 ** Input parsing and command execution flow
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -16,7 +17,7 @@ static int count(char *str, char *separator)
 
     if (!str)
         return 0;
-    copy = my_strdup(str);
+    copy = strdup((const char *)(str));
     token = strtok(copy, separator);
     while (token) {
         count++;
@@ -38,7 +39,7 @@ char **transform_to_string_array(char *str, char *separator)
     }
     token = strtok(str, separator);
     while (token) {
-        arg[index] = my_strdup(token);
+        arg[index] = strdup((const char *)(token));
         index++;
         token = strtok(NULL, separator);
     }
@@ -50,14 +51,14 @@ static char **execute_builtin(char **arg, char **copy_env, int *last_return)
 {
     char **result_env = NULL;
 
-    if (my_strcmp(arg[0], "cd") == 0)
+    if (strcmp((const char *)(arg[0]), "cd") == 0)
         result_env = execute_cd(arg, copy_env, last_return);
-    if (my_strcmp(arg[0], "setenv") == 0 && arg[1] != NULL)
+    if (strcmp((const char *)(arg[0]), "setenv") == 0 && arg[1] != NULL)
         result_env = execute_setenv(arg, copy_env, last_return);
-    if (my_strcmp(arg[0], "unsetenv") == 0)
+    if (strcmp((const char *)(arg[0]), "unsetenv") == 0)
         result_env = execute_unsetenv(arg, copy_env, last_return);
-    if (my_strcmp(arg[0], "env") == 0 ||
-        (my_strcmp(arg[0], "setenv") == 0 && arg[1] == NULL)) {
+    if (strcmp((const char *)(arg[0]), "env") == 0 ||
+        (strcmp((const char *)(arg[0]), "setenv") == 0 && arg[1] == NULL)) {
         print_env(copy_env, last_return);
         result_env = copy_env;
     }
@@ -71,7 +72,7 @@ static char **execute_builtin(char **arg, char **copy_env, int *last_return)
 static char **check_builtins(char *command, char **copy_env,
     int *last_return, char **commands_array)
 {
-    char *command_copy = my_strdup(command);
+    char *command_copy = strdup((const char *)(command));
     char **arg = transform_to_string_array(command_copy, " \t");
     char **result_env = NULL;
 
@@ -80,7 +81,7 @@ static char **check_builtins(char *command, char **copy_env,
         free_array(arg);
         return copy_env;
     }
-    if (my_strcmp(arg[0], "exit") == 0) {
+    if (strcmp((const char *)(arg[0]), "exit") == 0) {
         free_array(commands_array);
         exit_program(arg, copy_env, *last_return);
     }
@@ -95,7 +96,7 @@ static char **check_builtins(char *command, char **copy_env,
 char **parse_command(char *command, char **copy_env,
     int *last_return, char **commands_array)
 {
-    if (my_strchr(command, '|') != NULL) {
+    if (strchr((const char *)(command), '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
             print_error(NULL, NULL_CMD, (const char **)(copy_env));
             *last_return = 1;

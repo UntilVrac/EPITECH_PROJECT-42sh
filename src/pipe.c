@@ -5,6 +5,7 @@
 ** Pipe handling
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -61,7 +62,7 @@ static void redirect_pipe_fd(int in_fd, int out_fd)
 static void exec_pipe_child(char *command, int in_fd,
     int out_fd, char **copy_env)
 {
-    char *command_copy = my_strdup(command);
+    char *command_copy = strdup((const char *)(command));
     char **arg = NULL;
     char *path = NULL;
 
@@ -137,7 +138,7 @@ static void wait_for_all(pid_t last_pid, int *last_return, int nb_commands,
 
 void handle_pipe(char *line, char **copy_env, int *last_return)
 {
-    char *copy_line = my_strdup(line);
+    char *copy_line = strdup((const char *)(line));
     char **commands = transform_to_string_array(copy_line, "|");
     int prev_fd = STDIN_FILENO;
     pid_t last_pid = 0;

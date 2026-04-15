@@ -13,53 +13,6 @@
 #include "lang.h"
 #include "functions.h"
 
-// char *get_path_to_env_dir(void)
-// {
-//     char *cwd = getcwd(NULL, 0);
-//
-//     if (cwd == NULL)
-//         return NULL;
-//     return my_str_n_concat(4, cwd, "/", ENV_DIR_NAME, "/");
-// }
-// static bool check_cwd(const char *cwd)
-// {
-//     char *tmp = my_substring(cwd, 0, LEN_HOME);
-//     char *user_name = NULL;
-//     char **splited = NULL;
-//
-//     if (tmp == NULL)
-//         return false;
-//     if (strcmp((const char *)(tmp), HOME) != 0) {
-//         free(tmp);
-//         return false;
-//     }
-//     free(tmp);
-//     splited = my_split_str((const char *)(&(cwd[LEN_HOME])), '/');
-//     if (splited == NULL)
-//         return false;
-//     if (splited[0] == 0) {
-//         free(splited);
-//         return false;
-//     }
-//     return true;
-// }
-//
-// static char *get_path_to_simlink(const char *cwd)
-// {
-//     char *tmp = my_substring(cwd, 0, LEN_HOME);
-//     char *user_name = NULL;
-//     char **splited = NULL;
-//     char *path_to_simlink = NULL;
-//
-//     if (!check_cwd(cwd))
-//         return my_str_n_concat(3, cwd, "/", ENV_DIR_NAME);
-//     tmp = my_substring(cwd, 0, LEN_HOME + strlen(splited[0]) + 1);
-//     free_array(splited);
-//     path_to_simlink = my_str_concat(tmp, ENV_DIR_NAME);
-//     free(tmp);
-//     return path_to_simlink;
-// }
-//
 char *get_path_to_simlink(const char **env)
 {
     char **line = get_line_from_env(env, "HOME");
@@ -99,7 +52,6 @@ static void create_simlink(const char *path_to_env_dir,
         dup2(fd, 1);
         dup2(fd, 2);
     }
-    printf("execve\n");
     execve(LN, (char *const[5]){"ln", "-sf", (char *const)(path_to_env_dir),
             (char *const)(path_to_link), NULL}, (char *const *)(env));
     close(fd);
@@ -129,26 +81,3 @@ void init_env_dir(const char **env)
     remove(TMP_FILE);
     free_paths(path_to_link, path_to_env_dir);
 }
-
-// void init_env_dir(const char **env)
-// {
-//     char *cwd = getcwd(NULL, 0);
-//     char *path_to_env_dir = NULL;
-//     char *path_to_link = NULL;
-//     // char **path_home = get_line_from_env(env, "HOME");
-//     int pid = 0;
-//
-//     if (cwd == NULL)
-//         return;
-//     path_to_env_dir = my_str_n_concat(4, cwd, "/", ENV_DIR_NAME, "/");
-//     path_to_link = get_path_to_simlink((const char *)(cwd));
-//     printf("cwd : '%s'\n", cwd);
-//     free(cwd);
-//     pid = fork();
-//     if (pid == 0) {
-//         execve(LN, (char *const[]){"ln", "-sf", path_to_env_dir,
-//                 ENV_DIR_PATH, NULL}, (char *const *)(env));
-//         _exit(EPITECH_FAILURE);
-//     }
-//     free(path_to_env_dir);
-// }

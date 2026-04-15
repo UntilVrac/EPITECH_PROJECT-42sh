@@ -5,13 +5,14 @@
 ** Execution and path handling functions
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
 static char *get_path(char **copy_env)
 {
     for (int i = 0; copy_env[i] != NULL; i++) {
-        if (my_strncmp(copy_env[i], "PATH=", 5) == 0) {
+        if (strncmp((const char *)(copy_env[i]), "PATH=", 5) == 0) {
             return &copy_env[i][5];
         }
     }
@@ -20,16 +21,17 @@ static char *get_path(char **copy_env)
 
 static char *build_full_path(char *director, char *command)
 {
-    char *full_path = malloc(my_strlen(director) + my_strlen(command) + 2);
+    char *full_path = malloc(strlen((const char *)(director)) +
+        strlen((const char *)(command)) + 2);
 
     if (!full_path) {
         perror("malloc error full_path");
         return NULL;
     }
     full_path[0] = '\0';
-    my_strcat(full_path, director);
-    my_strcat(full_path, "/");
-    my_strcat(full_path, command);
+    strcat(full_path, (const char *)(director));
+    strcat(full_path, "/");
+    strcat(full_path, (const char *)(command));
     return full_path;
 }
 
@@ -38,7 +40,7 @@ static char *check_path(char **directors, char *command, char *path_copy)
     char *full_path = NULL;
 
     for (int i = 0; directors[i] != NULL; i++) {
-        if (my_strlen(directors[i]) == 0)
+        if (strlen((const char *)(directors[i])) == 0)
             full_path = build_full_path(".", command);
         else
             full_path = build_full_path(directors[i], command);
@@ -62,12 +64,12 @@ char *get_command_path(char *command, char **copy_env)
     char *path_copy = NULL;
     char **directors = NULL;
 
-    if (command && (my_strchr(command, '/')))
-        return my_strdup(command);
+    if (command && (strchr((const char *)(command), '/')))
+        return strdup((const char *)(command));
     path = get_path(copy_env);
     if (path == NULL)
         return NULL;
-    path_copy = my_strdup(path);
+    path_copy = strdup((const char *)(path));
     directors = transform_to_string_array(path_copy, ":");
     if (!directors) {
         free(path_copy);
@@ -149,8 +151,8 @@ static void execute_redirection_child(char *command_copy, char **arg,
 
 void execute_command(char *command, char **copy_env, int *last_return)
 {
-    char *command_copy = my_strdup(command);
-    char *tmp_copy = my_strdup(command);
+    char *command_copy = strdup((const char *)(command));
+    char *tmp_copy = strdup((const char *)(command));
     char **arg = transform_to_string_array(tmp_copy, " \t");
     char *path = get_command_path(arg[0], copy_env);
     pid_t pid = 0;
