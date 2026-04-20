@@ -5,7 +5,6 @@
 ** Input parsing and command execution flow
 */
 
-#include <string.h>
 #include "functions.h"
 #include "lang.h"
 
@@ -121,10 +120,15 @@ char **transform_to_string_array(char *str, char *separator)
     return arg;
 }
 
-static char **execute_builtin(char **arg, char **copy_env, int *last_return)
+static char **execute_builtin(char **arg, char **copy_env, int *last_return,
+    jobs_t *jobs)
 {
     char **result_env = NULL;
 
+    if (strcmp(arg[0], "jobs") == 0) {
+        jobs_command(arg, jobs);
+        result_env = copy_env;
+    }
     if (strcmp((const char *)(arg[0]), "cd") == 0)
         result_env = execute_cd(arg, copy_env, last_return);
     if (strcmp((const char *)(arg[0]), "setenv") == 0 && arg[1] != NULL)
@@ -136,19 +140,34 @@ static char **execute_builtin(char **arg, char **copy_env, int *last_return)
         print_env(copy_env, last_return);
         result_env = copy_env;
     }
-    if (result_env) {
-        free_array(arg);
+    if (result_env)
         return result_env;
-    }
     return NULL;
 }
 
-static char **check_builtins(char *command, char **copy_env,
-    int *last_return, char **commands_array)
+static char **exec_all(char *command, char ***array,
+    int *last_return, jobs_t **jobs)
+{
+    char **copy_env = array[0];
+    char **arg = array[1];
+    char **result_env = NULL;
+
+    result_env = execute_builtin(arg, copy_env, last_return, *jobs);
+    free_array(arg);
+    if (result_env)
+        return result_env;
+    execute_command(command, copy_env, last_return, jobs);
+    return copy_env;
+}
+
+static char **check_builtins(char *command, char ***array,
+    int *last_return, jobs_t **jobs)
 {
     char *command_copy = strdup((const char *)(command));
     char **arg = transform_to_string_array(command_copy, " \t");
-    char **result_env = NULL;
+    char **copy_env = array[0];
+    char **commands_array = array[1];
+    jobs_t *tmp = *jobs;
 
     free(command_copy);
     if (!arg || !arg[0]) {
@@ -156,20 +175,22 @@ static char **check_builtins(char *command, char **copy_env,
         return copy_env;
     }
     if (strcmp((const char *)(arg[0]), "exit") == 0) {
-        free_array(commands_array);
-        exit_program(arg, copy_env, *last_return);
+        free_array(arg);
+        exit_program(commands_array, copy_env, *last_return, jobs);
+        return copy_env;
     }
-    result_env = execute_builtin(arg, copy_env, last_return);
-    if (result_env)
-        return result_env;
-    free_array(arg);
-    execute_command(command, copy_env, last_return);
-    return copy_env;
+    if (tmp[jobs_struct_len(tmp)].state == EXITED)
+        tmp[jobs_struct_len(tmp)].state = NULL_STATE;
+    return exec_all(command, (char **[]) {copy_env, arg}, last_return, jobs);
 }
 
-char **parse_command(char *command, char **copy_env,
-    int *last_return, char **commands_array)
+char **parse_command(char *command, char ***array,
+    int *last_return, jobs_t **jobs)
 {
+    char **copy_env = array[0];
+    char **commands_array = array[1];
+
+    (void)commands_array;
     if (strchr((const char *)(command), '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
             print_error(NULL, NULL_CMD, (const char **)(copy_env));
@@ -179,5 +200,5 @@ char **parse_command(char *command, char **copy_env,
         handle_pipe(command, copy_env, last_return);
         return copy_env;
     }
-    return check_builtins(command, copy_env, last_return, commands_array);
+    return check_builtins(command, array, last_return, jobs);
 }

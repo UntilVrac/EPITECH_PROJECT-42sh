@@ -16,9 +16,19 @@ void print_env(char **copy_env, int *last_return)
     *last_return = 0;
 }
 
-void exit_program(char **arg, char **copy_env, int last_return)
+void exit_program(char **commands_array, char **copy_env, int last_return,
+    jobs_t **jobs)
 {
-    free_array(arg);
+    jobs_t *tmp = *jobs;
+    size_t last = jobs_struct_len(tmp);
+
+    if (tmp && tmp[0].state != NULL_STATE && tmp[last].state != EXITED) {
+        tmp[last].state = EXITED;
+        fprintf(stderr, "There are suspended jobs.\n");
+        return;
+    }
+    free_array(commands_array);
+    free_jobs_struct(*jobs);
     free_array(copy_env);
     print_exit();
     exit(last_return);

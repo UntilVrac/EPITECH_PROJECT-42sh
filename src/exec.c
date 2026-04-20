@@ -8,6 +8,7 @@
 #include <string.h>
 #include "functions.h"
 #include "lang.h"
+#include "jobs.h"
 
 static char *get_path(char **copy_env)
 {
@@ -98,47 +99,60 @@ void handle_signal_error(int status, int *last_return, const char **env)
     *last_return = 128 + sig;
 }
 
+static void check_exec_error(char **arg, char *path, char **copy_env)
+{
+    free(path);
+    if (errno == ENOEXEC)
+        print_error((const char *)(arg[0]), NOT_EXEC,
+            (const char **)(copy_env));
+    else if (errno == EACCES)
+        print_error((const char *)(arg[0]), PERM_DENIED,
+            (const char **)(copy_env));
+    else
+        print_error((const char *)(arg[0]), CMD_NOT_FOUND,
+            (const char **)(copy_env));
+    free_array(copy_env);
+    free_array(arg);
+    exit(1);
+}
+
 void execute_child(char **arg, char *path, char **copy_env)
 {
+    setpgid(0, 0);
+    signal(SIGTSTP, SIG_DFL);
     signal(SIGINT, SIG_DFL);
     if (execve(path, arg, copy_env) == -1) {
-        free(path);
-        if (errno == ENOEXEC) {
-            print_error((const char *)(arg[0]), NOT_EXEC,
-                (const char **)(copy_env));
-            free_array(copy_env);
-            free_array(arg);
-            exit(1);
-        }
-        if (errno == EACCES)
-            print_error((const char *)(arg[0]), PERM_DENIED,
-                (const char **)(copy_env));
-        else
-            print_error((const char *)(arg[0]), CMD_NOT_FOUND,
-                (const char **)(copy_env));
-        free_array(copy_env);
-        free_array(arg);
-        exit(1);
+        check_exec_error(arg, path, copy_env);
     }
 }
 
-static void execute_parent(pid_t pid, char *path, int *last_return,
-    const char **env)
+static void execute_parent(pid_t pid, int *last_return,
+    char ***array, jobs_t **jobs)
 {
     int status = 0;
+    const char **env = (const char **) array[0];
+    const char **command = (const char **) array[1];
 
-    waitpid(pid, &status, 0);
+    setpgid(pid, pid);
+    tcsetpgrp(STDIN_FILENO, pid);
+    waitpid(pid, &status, WUNTRACED);
+    tcsetpgrp(STDIN_FILENO, getpgrp());
+    if (WIFSTOPPED(status)) {
+        printf("\nSuspended\n");
+        add_elements(jobs, *command, pid, STOPPED);
+    }
     if (WIFEXITED(status)) {
         *last_return = WEXITSTATUS(status);
     } else if (WIFSIGNALED(status)) {
         handle_signal_error(status, last_return, (const char **)(env));
     }
-    free(path);
 }
 
-static void execute_redirection_child(char *command_copy, char **arg,
+static void execute_redirection_child(const char *command, char **arg,
     char *path, char **copy_env)
 {
+    char *command_copy = strdup((const char *)(command));
+
     free_array(arg);
     if (apply_redirection(command_copy, (const char **)(copy_env)) == -1) {
         free_array(copy_env);
@@ -153,9 +167,9 @@ static void execute_redirection_child(char *command_copy, char **arg,
     exit(0);
 }
 
-void execute_command(char *command, char **copy_env, int *last_return)
+void execute_command(char *command, char **copy_env, int *last_return,
+    jobs_t **jobs)
 {
-    char *command_copy = strdup((const char *)(command));
     char *tmp_copy = strdup((const char *)(command));
     char **arg = transform_to_string_array(tmp_copy, " \t");
     char *path = get_command_path(arg[0], copy_env);
@@ -163,16 +177,17 @@ void execute_command(char *command, char **copy_env, int *last_return)
 
     free(tmp_copy);
     if (path == NULL) {
-        print_error((const char *)(arg[0]), CMD_NOT_FOUND,
-            (const char **)(copy_env));
+        print_error(arg[0], CMD_NOT_FOUND, (const char **)(copy_env));
         *last_return = 1;
     } else {
         pid = fork();
         if (pid == 0)
-            execute_redirection_child(command_copy, arg, path, copy_env);
-        else
-            execute_parent(pid, path, last_return, (const char **)(copy_env));
+            execute_redirection_child(command, arg, path, copy_env);
+        else {
+            execute_parent(pid, last_return, (char **[]){copy_env, &command},
+                jobs);
+            free(path);
+        }
     }
     free_array(arg);
-    free(command_copy);
 }
