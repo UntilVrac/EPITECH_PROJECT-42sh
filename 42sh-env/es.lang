@@ -9,6 +9,7 @@ NULL_CMD=Comando nulo inválido
 SEG_FAULT=Error de segmentación
 SEG_FAULT_CD=Error de segmentación (se ha creado un `core')
 FLOAT_POINT_EXCEPT=Excepción de punto flotante (se ha creado un `core')
+FLOAT_POINT_EXCEPT_CD=Excepción de punto flotante
 NO_HOME_DIR=La variable $home no estñ definida.
 NOT_A_DIR=Not a directory.
 PERM_DENIED=Permission denied.

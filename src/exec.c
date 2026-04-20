@@ -88,11 +88,11 @@ void handle_signal_error(int status, int *last_return, const char **env)
         *last_return = 1;
         return;
     }
-    if (WCOREDUMP(status) && sig == SIGSEGV)
-        print_error(NULL, SEG_FAULT_CD, env);
-    else if (sig == SIGSEGV)
-        print_error(NULL, SEG_FAULT, env);
-    if (sig != SIGSEGV && message) {
+    if (sig == SIGSEGV)
+        print_error(NULL, SEG_FAULT + (WCOREDUMP(status) != 0), env);
+    if (sig == SIGFPE)
+        print_error(NULL, FLOAT_POINT_EXCEPT + (WCOREDUMP(status) != 0), env);
+    if (sig != SIGSEGV && sig != SIGFPE && message) {
         fprintf(stderr, "%s", message);
         if (WCOREDUMP(status))
             fprintf(stderr, " (core dumped)");

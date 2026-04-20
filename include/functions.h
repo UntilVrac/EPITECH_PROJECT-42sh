@@ -20,6 +20,7 @@
 
     #define SEMICOLON ";"
     #define GLOBBINGS_CHARS "*?[]"
+    #define GLOBBINGS_TMP_FILE ".globbings.tmp"
 
 // builtins.c
 void print_env(char **env, int *last_return);

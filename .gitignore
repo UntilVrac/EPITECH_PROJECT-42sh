@@ -1,3 +1,4 @@
 *.o
 *.a
 42sh
+my_divzero
