@@ -9,6 +9,9 @@
     #define JOBS_H_
 
     #include <sys/types.h>
+    #define JOBS_CMD "jobs"
+    #define JOBS_BG_CMD "bg"
+    #define JOBS_FG_CMD "fg"
 
 typedef enum jobs_state {
     STOPPED,
@@ -44,9 +47,9 @@ void job_control_synonym(char **args, int *last_return, const char **env,
 jobs_t *get_jobs(const char *arg, jobs_t *jobs, char **args, size_t *pos);
 
 static const jobs_builtins_t jobs_builtins[] = {
-    {"fg", fg_command},
-    {"bg", bg_command},
-    {"jobs", jobs_command},
+    {JOBS_FG_CMD, fg_command},
+    {JOBS_BG_CMD, bg_command},
+    {JOBS_CMD, jobs_command},
     {NULL, NULL}
 };
 
