@@ -13,7 +13,8 @@ void bg_command(char **args, const char **env, jobs_t **jobs, int *last_return)
 {
     size_t start = 0;
 
-    if (!strcmp(args[0], "bg"))
+    *last_return = 0;
+    if (!strcmp(args[0], JOBS_BG_CMD))
         start++;
     (void)start;
     (void)env;
@@ -57,6 +58,7 @@ static void continue_process(jobs_t *jobs, int *last_return, const char **env,
         exit(0);
     } else {
         continue_process_parent(jobs, last_return, env);
+        waitpid(fork_pid, NULL, 0);
     }
 }
 
@@ -109,7 +111,7 @@ void fg_command(char **args, const char **env, jobs_t **jobs, int *last_return)
     *last_return = 0;
     if (is_empty_struct(*jobs, args, last_return))
         return;
-    tmp = check_args_jobs(args, jobs, &i, "fg");
+    tmp = check_args_jobs(args, jobs, &i, JOBS_FG_CMD);
     if (!tmp) {
         *last_return = 1;
         return;
