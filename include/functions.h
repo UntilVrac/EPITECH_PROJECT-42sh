@@ -68,10 +68,11 @@ void display_custom_prompt(char **copy_env);
 // tools.c
 char *cut_ending_char(char *buffer, char c);
 bool str_isnum(const char *str, int *val);
+char **split_semicolon(char *line);
 // subshell.c
+void update_depth(char character, int *depth);
 int check_subshell(char *command, char **copy_env,
     int *last_return, jobs_t **jobs);
-char **split_semicolon(char *line);
 
 static const builtins_t builtins_functions[] = {
     {"cd", execute_cd},

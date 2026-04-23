@@ -69,19 +69,7 @@ static char **exec_subshell(char *content, char **copy_env,
     return copy_env;
 }
 
-int check_subshell(char *command, char **copy_env,
-    int *last_return, jobs_t **jobs)
-{
-    char *subshell_content = get_subshell_content(command);
-
-    if (subshell_content == NULL)
-        return 0;
-    exec_subshell(subshell_content, copy_env, last_return, jobs);
-    free(subshell_content);
-    return 1;
-}
-
-static void update_depth(char character, int *depth)
+void update_depth(char character, int *depth)
 {
     if (character == '(')
         (*depth)++;
@@ -89,40 +77,71 @@ static void update_depth(char character, int *depth)
         (*depth)--;
 }
 
-static int count_semicolons(char *line)
+static int is_empty(char *str)
 {
-    int count = 1;
-    int depth = 0;
-
-    if (!line)
-        return 0;
-    for (int i = 0; line[i] != '\0'; i++) {
-        update_depth(line[i], &depth);
-        if (depth == 0 && line[i] == ';')
-            count++;
-    }
-    return count;
+    if (!str)
+        return 1;
+    for (int i = 0; str[i] != '\0'; i++)
+        if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n')
+            return 0;
+    return 1;
 }
 
-char **split_semicolon(char *line)
+static int check_syntax(const char *command)
 {
     int depth = 0;
-    int start_pos = 0;
-    int index = 0;
-    char **commands = malloc(sizeof(char *) * (count_semicolons(line) + 1));
+    int i = 0;
 
-    if (!commands || !line)
-        return NULL;
-    for (int i = 0; line[i] != '\0'; i++) {
-        update_depth(line[i], &depth);
-        if (depth == 0 && line[i] == ';') {
-            commands[index] = my_substring(line, start_pos, i - start_pos);
-            index++;
-            start_pos = i + 1;
-        }
+    while (command[i] == ' ' || command[i] == '\t')
+        i++;
+    if (command[i] != '(')
+        return 0;
+    for (; command[i] != '\0'; i++) {
+        update_depth(command[i], &depth);
+        if (depth < 0)
+            return -2;
     }
-    commands[index] = my_substring(line, start_pos, strlen(line) - start_pos);
-    index++;
-    commands[index] = NULL;
-    return commands;
+    if (depth > 0)
+        return -1;
+    return 1;
+}
+
+static int print_syntax_error(int syntax, int *last_return,
+    char *subshell_content)
+{
+    const char *error1 = "Too many ('s.\n";
+    const char *error2 = "Too many )'s.\n";
+    const char *error3 = "Invalid null command.\n";
+
+    if (syntax == -1)
+        write(2, error1, strlen(error1));
+    if (syntax == -2)
+        write(2, error2, strlen(error2));
+    if (syntax == -3)
+        write(2, error3, strlen(error3));
+    *last_return = 1;
+    if (subshell_content)
+        free(subshell_content);
+    return 1;
+}
+
+int check_subshell(char *command, char **copy_env,
+    int *last_return, jobs_t **jobs)
+{
+    int syntax = check_syntax(command);
+    char *subshell_content = NULL;
+
+    if (syntax < 0)
+        return print_syntax_error(syntax, last_return, NULL);
+    if (syntax == 0) {
+        if (strchr(command, ')') != 0)
+            return print_syntax_error(-2, last_return, NULL);
+        return 0;
+    }
+    subshell_content = get_subshell_content(command);
+    if (is_empty(subshell_content))
+        return print_syntax_error(-3, last_return, subshell_content);
+    exec_subshell(subshell_content, copy_env, last_return, jobs);
+    free(subshell_content);
+    return 1;
 }
