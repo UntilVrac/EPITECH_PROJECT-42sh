@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2026
 ** G2 - Shell Programming - 42sh
 ** File description:
-** Minishell 2 project
+** 42sh project
 */
 
 #include <string.h>
@@ -38,7 +38,7 @@ static char **get_env_copy(char **env)
     return copy_env;
 }
 
-static char **process_line(char *line, char **copy_env, int *last_return,
+char **process_line(char *line, char **copy_env, int *last_return,
     jobs_t **jobs)
 {
     char **commands = NULL;
@@ -46,7 +46,7 @@ static char **process_line(char *line, char **copy_env, int *last_return,
 
     if (len > 0 && line[len - 1] == '\n')
         line[len - 1] = '\0';
-    commands = transform_to_string_array(line, ";");
+    commands = split_semicolon(line);
     if (line)
         free(line);
     if (!commands)

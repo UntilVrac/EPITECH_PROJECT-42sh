@@ -40,7 +40,8 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				src/jobs/manage_jobs.c								\
 				src/parsing.c										\
 				src/pipe.c											\
-				src/redirections.c
+				src/redirections.c									\
+				src/subshell.c
 
 MAIN_SRC	=	src/main.c # main file
 

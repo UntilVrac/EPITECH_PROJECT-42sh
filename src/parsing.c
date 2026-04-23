@@ -189,6 +189,8 @@ char **parse_command(char *command, char ***array,
     char **commands_array = array[1];
 
     (void)commands_array;
+    if (check_subshell(command, copy_env, last_return, jobs))
+        return copy_env;
     if (strchr((const char *)(command), '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
             print_error(NULL, NULL_CMD, (const char **)(copy_env));
