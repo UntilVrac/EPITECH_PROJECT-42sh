@@ -63,3 +63,20 @@ int get_paths_with_globbings(char **str, const char **env)
     *str = pattern;
     return get_possibilities(str);
 }
+
+char **apply_globbings_on_args(char **args, const char **env)
+{
+    char *tmp = NULL;
+
+    if (args == NULL)
+        return NULL;
+    for (size_t i = 0; args[i] != NULL; ++i)
+        get_paths_with_globbings(&(args[i]), env);
+    tmp = my_str_join(" ", (const char **)(args));
+    free_array(args);
+    if (tmp == NULL)
+        return NULL;
+    args = my_split_str((const char *)(tmp), ' ');
+    free(tmp);
+    return args;
+}

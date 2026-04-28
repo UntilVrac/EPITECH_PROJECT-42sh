@@ -8,11 +8,11 @@
 #include "functions.h"
 #include "lang.h"
 
-static void replace_backslash_with_separator(char **arg, size_t *x,
+/*static void replace_backslash_with_separator(char **arg, size_t *x,
     char *separator)
 {
     char *tmp = NULL;
-
+//
     arg[*x] = realloc(arg[*x], sizeof(char *) * (strlen(arg[*x]) +
             strlen(separator)));
     if (!arg[*x])
@@ -24,12 +24,12 @@ static void replace_backslash_with_separator(char **arg, size_t *x,
         exit(84);
     free(tmp);
 }
-
+//
 static char *check_backslash(char **arg, size_t *x, char *separator)
 {
     char *tmp = NULL;
     size_t nb_loop = 0;
-
+//
     while (arg[*x][strlen(arg[*x]) - 1] == '\\') {
         if (strlen(separator) > 1)
             replace_backslash_with_separator(arg, x, separator);
@@ -48,7 +48,7 @@ static char *check_backslash(char **arg, size_t *x, char *separator)
     }
     return arg[*x - nb_loop];
 }
-
+//
 static size_t count_without_backslash(char **arg, size_t count_nb)
 {
     for (size_t x = 0; arg[x] != NULL; x++)
@@ -56,12 +56,12 @@ static size_t count_without_backslash(char **arg, size_t count_nb)
             count_nb--;
     return count_nb;
 }
-
+//
 static char **check_inhibitors(char **arg, char *separator, size_t count_nb)
 {
     char **new_arg = NULL;
     size_t current = 0;
-
+//
     count_nb = count_without_backslash(arg, count_nb);
     new_arg = malloc(sizeof(char *) * (count_nb + 1));
     if (!new_arg)
@@ -79,13 +79,13 @@ static char **check_inhibitors(char **arg, char *separator, size_t count_nb)
     free_array(arg);
     return new_arg;
 }
-
+//
 static size_t count(char *str, char *separator)
 {
     size_t count = 0;
     char *copy = NULL;
     char *token = NULL;
-
+//
     if (!str)
         return 0;
     copy = strdup((const char *)(str));
@@ -97,14 +97,14 @@ static size_t count(char *str, char *separator)
     free(copy);
     return count;
 }
-
+//
 char **transform_to_string_array(char *str, char *separator)
 {
     size_t count_nb = count(str, separator);
     char **arg = malloc(sizeof(char *) * (count_nb + 1));
     int index = 0;
     char *token = NULL;
-
+//
     if (!arg) {
         perror("malloc error transform");
         exit(84);
@@ -118,6 +118,67 @@ char **transform_to_string_array(char *str, char *separator)
     arg[index] = NULL;
     arg = check_inhibitors(arg, separator, count_nb);
     return arg;
+}
+*/
+void my_replace_in_str(char *str, char c_init, char c_new)
+{
+    size_t size = 0;
+    size_t j = 0;
+
+    if (str == NULL)
+        return;
+    size = strlen(str);
+    for (size_t i = 0; i < size; ++i) {
+        if (str[i] == '\\') {
+            i += 1;
+            str[j] = str[i];
+        } else if (str[i] == c_init)
+            str[j] = c_new;
+        else
+            str[j] = str[i];
+        j += 1;
+    }
+    str[j] = '\0';
+}
+
+static char **remove_empty_strings(char **arr_init)
+{
+    char **arr_new = calloc(my_word_array_len((const char **)(arr_init)) + 1,
+        sizeof(char *));
+    size_t index = 0;
+
+    if (arr_new == NULL) {
+        free_array((char **)(arr_init));
+        return NULL;
+    }
+    for (size_t i = 0; arr_init[i] != NULL; ++i) {
+        if (strlen(arr_init[i]) > 0) {
+            arr_new[index] = arr_init[i];
+            index += 1;
+        } else
+            free(arr_init[i]);
+    }
+    free(arr_init);
+    return arr_new;
+}
+
+char **transform_to_string_array(const char *str, const char *separator)
+{
+    char *tmp = NULL;
+    char **arr = NULL;
+
+    if (str == NULL || separator == NULL)
+        return NULL;
+    tmp = strdup(str);
+    if (tmp == NULL)
+        return NULL;
+    for (size_t i = 0; separator[i] != '\0'; ++i)
+        my_replace_in_str(tmp, separator[i], '\n');
+    arr = my_split_str((const char *)(tmp), '\n');
+    free(tmp);
+    if (arr == NULL)
+        return NULL;
+    return remove_empty_strings(arr);
 }
 
 static char **execute_builtin(char **arg, char **copy_env, int *last_return,
@@ -167,6 +228,7 @@ static char **check_builtins(char *command, char ***array,
     char **commands_array = array[1];
     jobs_t *tmp = *jobs;
 
+    arg = apply_globbings_on_args(arg, NULL);
     free(command_copy);
     if (!arg || !arg[0]) {
         free_array(arg);

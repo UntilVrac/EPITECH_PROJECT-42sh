@@ -59,7 +59,8 @@ void detele_env_var(char **copy_env, int index);
 char **parse_command(char *command, char ***array, int *last_return,
     jobs_t **jobs);
 // main.c
-char **transform_to_string_array(char *str, char *separator);
+char **transform_to_string_array(char *str, const char *separator);
+void my_replace_in_str(char *str, char c_init, char c_new);
 void free_array(char **arg);
 void print_exit(void);
 char **process_line(char *line, char **copy_env, int *last_return,
@@ -85,6 +86,7 @@ char *handle_backticks(char *line, int *last_return, jobs_t **jobs,
 // globbings.c
 int get_paths_with_globbings(char **str, const char **env);
 char *get_path_with_home_dir(const char *str_init, const char **env);
+char **apply_globbings_on_args(char **args, const char **env);
 // free_tools.c
 void nfree(size_t n, ...);
 void free_array(char **arg);
