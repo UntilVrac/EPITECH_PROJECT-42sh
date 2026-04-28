@@ -106,7 +106,7 @@ void init_env_dir(const char **env);
 char **get_line_from_env(const char **env, const char *name);
 char *get_path_to_simlink(const char **env);
 
-char *my_str_concat(char *str1, char *str2);
+char *my_str_concat(const char *str1, const char *str2);
 char *my_str_n_concat(unsigned int n, ...);
 int my_nbr_occurences_in_str(char c, const char *str);
 char *my_substring(const char *str, int start_pos, unsigned int n);

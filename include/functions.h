@@ -51,7 +51,7 @@ void execute_command(char *command, char **copy_env, int *last_return,
     jobs_t **jobs);
 // env_utils.c
 char *build_env_variable(char *name, char *value);
-int get_env_var_index(char **copy_env, char *name);
+int get_env_var_index(const char **copy_env, char *name);
 int is_name_valid(char *name, const char **env);
 char **add_to_env(char **copy_env, char *new_var);
 void detele_env_var(char **copy_env, int index);

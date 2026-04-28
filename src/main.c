@@ -9,16 +9,6 @@
 #include "functions.h"
 #include "lang.h"
 
-void free_array(char **arg)
-{
-    if (arg == NULL)
-        return;
-    for (int i = 0; arg[i] != NULL; i++) {
-        free(arg[i]);
-    }
-    free(arg);
-}
-
 static char **get_env_copy(char **env)
 {
     int i = 0;

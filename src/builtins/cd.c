@@ -15,7 +15,7 @@ static char *get_cd_path(char **arg, char **copy_env)
     int index = 0;
 
     if (!path || strcmp((const char *)(path), "~") == 0) {
-        index = get_env_var_index(copy_env, "HOME");
+        index = get_env_var_index((const char **)(copy_env), "HOME");
         if (index == -1) {
             print_error("cd", NO_HOME_DIR, (const char **)(copy_env));
             return NULL;
@@ -23,7 +23,7 @@ static char *get_cd_path(char **arg, char **copy_env)
         return &copy_env[index][5];
     }
     if (strcmp((const char *)(path), "-") == 0) {
-        index = get_env_var_index(copy_env, "OLDPWD");
+        index = get_env_var_index((const char **)(copy_env), "OLDPWD");
         if (index == -1) {
             print_error("", NO_SUCH_FILE_OR_DIR, (const char **)(copy_env));
             return NULL;

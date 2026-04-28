@@ -11,7 +11,7 @@
 #include <string.h>
 #include "lang.h"
 
-char *my_str_concat(char *str1, char *str2)
+char *my_str_concat(const char *str1, const char *str2)
 {
     char *str_new;
     int size1 = strlen(str1);

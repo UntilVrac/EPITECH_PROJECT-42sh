@@ -29,7 +29,7 @@ char *build_env_variable(char *name, char *value)
     return new_var;
 }
 
-int get_env_var_index(char **copy_env, char *name)
+int get_env_var_index(const char **copy_env, char *name)
 {
     for (int i = 0; copy_env[i] != NULL; i++) {
         if (strncmp((const char *)(copy_env[i]), (const char *)(name),

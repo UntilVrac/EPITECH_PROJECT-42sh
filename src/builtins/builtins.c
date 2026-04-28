@@ -61,7 +61,7 @@ char **execute_setenv(char **arg, char **copy_env, int *last_return)
         return copy_env;
     *last_return = 0;
     new_var = build_env_variable(arg[1], arg[2]);
-    index = get_env_var_index(copy_env, arg[1]);
+    index = get_env_var_index((const char **)(copy_env), arg[1]);
     if (index != -1) {
         free(copy_env[index]);
         copy_env[index] = new_var;
@@ -81,7 +81,7 @@ char **execute_unsetenv(char **arg, char **copy_env, int *last_return)
     }
     *last_return = 0;
     for (int i = 1; arg[i] != NULL; i++) {
-        index = get_env_var_index(copy_env, arg[i]);
+        index = get_env_var_index((const char **)(copy_env), arg[i]);
         if (index != -1) {
             detele_env_var(copy_env, index);
         }
