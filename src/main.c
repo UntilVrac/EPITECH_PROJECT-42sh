@@ -37,7 +37,7 @@ char **process_line(char *line, char **copy_env, int *last_return,
     if (len > 0 && line[len - 1] == '\n')
         line[len - 1] = '\0';
     line = handle_backticks(line, last_return, jobs, copy_env);
-    commands = transform_to_string_array(line, ";");
+    commands = split_semicolon(line);
     if (line)
         free(line);
     if (!commands)

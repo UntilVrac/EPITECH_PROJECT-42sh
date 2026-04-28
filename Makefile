@@ -32,9 +32,9 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				bonus/bonus.c										\
 				src/free_tools.c									\
 				src/tools.c											\
-				src/builtins.c										\
-				src/cd.c											\
-				src/env_utils.c										\
+				src/builtins/builtins.c								\
+				src/builtins/cd.c									\
+				src/builtins/env_utils.c							\
 				src/exec.c											\
 				src/jobs/get_jobs.c									\
 				src/jobs/jobs_control.c								\
