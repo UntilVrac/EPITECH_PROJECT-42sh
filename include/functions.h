@@ -25,6 +25,11 @@
     #define GLOBBINGS_TMP_FILE ".globbings.tmp"
     #define GLOB_FLAGS (GLOB_NOCHECK)
 
+typedef int signal_t;
+
+static const signal_t ignored_signals[5] = {
+    SIGINT, SIGTSTP, SIGTTIN, SIGTTOU, 0};
+
 typedef struct builtins_s {
     char *name;
     char **(*ptr)(char **, char **, int *);

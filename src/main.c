@@ -96,10 +96,8 @@ int main(int argc, char **argv, char **env)
     init_env_dir((const char **)(copy_env));
     (void)argc;
     (void)argv;
-    signal(SIGINT, SIG_IGN);
-    signal(SIGTSTP, SIG_IGN);
-    signal(SIGTTIN, SIG_IGN);
-    signal(SIGTTOU, SIG_IGN);
+    for (size_t i = 0; ignored_signals[i] != 0; ++i)
+        signal(ignored_signals[i], SIG_IGN);
     read_input(&copy_env, &last_return);
     free_array(copy_env);
     return last_return;
