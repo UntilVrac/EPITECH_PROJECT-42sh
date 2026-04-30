@@ -10,7 +10,7 @@
 #include "lang.h"
 
 static char **create_part_tmp_without_separator(char **tmp, size_t *current,
-    char **new_arg, size_t *y)
+    const char **new_arg, size_t *y)
 {
     char *part_tmp = malloc(sizeof(char) * (strlen(new_arg[*y]) - 1));
     size_t pos = 0;
@@ -29,7 +29,7 @@ static char **create_part_tmp_without_separator(char **tmp, size_t *current,
     return tmp;
 }
 
-static char *create_part_before_quote(char **new_arg, size_t **indexes)
+static char *create_part_before_quote(const char **new_arg, size_t **indexes)
 {
     size_t *y = indexes[0];
     size_t *nb_char_part_tmp = indexes[1];
@@ -71,7 +71,7 @@ static char **quote_containing_only_separator(size_t **indexes, char *part_tmp,
     return tmp;
 }
 
-static char *realloc_part_tmp(size_t **indexes, char **new_arg,
+static char *realloc_part_tmp(size_t **indexes, const char **new_arg,
     size_t nb_char_quote_part, char *part_tmp)
 {
     size_t tmp_x = indexes[0][0];
@@ -92,7 +92,7 @@ static char *realloc_part_tmp(size_t **indexes, char **new_arg,
     return part_tmp;
 }
 
-static char *create_part_inside_quote(size_t **indexes, char **new_arg,
+static char *create_part_inside_quote(size_t **indexes, const char **new_arg,
     char *part_tmp, const char *separator)
 {
     size_t nb_char_part_tmp = indexes[0][2];
@@ -127,7 +127,7 @@ static char **add_part_to_tmp(char **tmp, size_t *current, char *part_tmp)
     return tmp;
 }
 
-static char **create_part(char **tmp, char **new_arg, size_t **indexes,
+static char **create_part(char **tmp, const char **new_arg, size_t **indexes,
     const char *separator)
 {
     size_t *current = indexes[0];
@@ -164,7 +164,7 @@ static bool char_cmp_quote(bool containing_quote, char character)
     return containing_quote;
 }
 
-char **assemble_quote(char **new_arg, const char *sep)
+char **assemble_quote(const char **new_arg, const char *sep)
 {
     char **tmp = malloc(sizeof(char *) * 1);
     size_t current = 0;
@@ -182,7 +182,7 @@ char **assemble_quote(char **new_arg, const char *sep)
             tmp = create_part(tmp, new_arg, (size_t *[]){&current, &y}, sep);
         containing_quote = false;
     }
-    free_array(new_arg);
+    free_array((char **)new_arg);
     for (size_t y = 0; tmp[y] != NULL; y++)
         replace_backslash_by_quote(tmp, y);
     return tmp;

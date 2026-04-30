@@ -94,7 +94,7 @@ void nfree_array(size_t n, ...);
 //inhibitors.c
 char **check_quotes(char **new_arg, const char *separator);
 //quote_inhibitor.c
-char **assemble_quote(char **new_arg, const char *sep);
+char **assemble_quote(const char **new_arg, const char *sep);
 
 static const builtins_t builtins_functions[] = {
     {"cd", execute_cd},
