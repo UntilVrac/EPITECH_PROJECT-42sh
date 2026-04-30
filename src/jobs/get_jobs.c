@@ -125,3 +125,15 @@ jobs_t *get_jobs(const char *arg, jobs_t *jobs, char **args, size_t *pos)
             return check_pattern(arg, jobs, args, pos);
     }
 }
+
+size_t get_jobs_by_pid(jobs_t *jobs, pid_t pid)
+{
+    size_t i = 0;
+
+    while (jobs[i].state != EXITED && jobs[i].state != NULL_STATE) {
+        if (pid == jobs[i].pid)
+            break;
+        i++;
+    }
+    return i;
+}

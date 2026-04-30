@@ -9,19 +9,6 @@
 #include "functions.h"
 #include "jobs.h"
 
-void bg_command(char **args, const char **env, jobs_t **jobs, int *last_return)
-{
-    size_t start = 0;
-
-    *last_return = 0;
-    if (!strcmp(args[0], JOBS_BG_CMD))
-        start++;
-    (void)start;
-    (void)env;
-    (void)jobs;
-    (void)last_return;
-}
-
 static void continue_process_parent(jobs_t *jobs, int *last_return,
     const char **env)
 {
@@ -62,18 +49,22 @@ static void continue_process(jobs_t *jobs, int *last_return, const char **env,
     }
 }
 
-static void remove_element(jobs_t **jobs, size_t pos)
+static void continue_process_bg(jobs_t *jobs, const char **env)
 {
-    jobs_t *tmp = *jobs;
-    size_t len = jobs_struct_len(tmp);
+    pid_t pid = fork();
 
-    if (pos >= len)
-        return;
-    free(tmp[pos].name);
-    for (size_t i = pos; i < len; i++)
-        tmp[i] = tmp[i + 1];
-    tmp = realloc(tmp, sizeof(jobs_t) * len);
-    *jobs = tmp;
+    (void)env;
+    if (pid == 0) {
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+        printf("[%zu]\t%s &\n", jobs->pos, jobs->name);
+        kill(jobs->pid, SIGCONT);
+        free_array((char **)(env));
+        exit(0);
+    } else {
+        jobs->state = RUNNING;
+        waitpid(pid, NULL, 0);
+    }
 }
 
 static bool is_empty_struct(jobs_t *jobs, char **args, int *last_return)
@@ -86,42 +77,66 @@ static bool is_empty_struct(jobs_t *jobs, char **args, int *last_return)
     return false;
 }
 
-static jobs_t *check_args_jobs(char **args, jobs_t **jobs, size_t *i,
-    const char *command)
+static jobs_t *check_args_jobs(char **args, jobs_t **jobs, size_t *pos,
+    size_t i)
 {
-    size_t start = 0;
     jobs_t *tmp = *jobs;
 
     if (!args)
         return NULL;
-    if (!strcmp(args[0], command))
-        start++;
-    if (!args[start]) {
-        *i = jobs_struct_len(*jobs) - 1;
-        return &(tmp[*i]);
+    if (!args[i]) {
+        *pos = jobs_struct_len(*jobs) - 1;
+        return &(tmp[*pos]);
     } else
-        return get_jobs(args[start], *jobs, args, i);
+        return get_jobs(args[i], *jobs, args, pos);
+}
+
+void bg_command(char **args, const char **env, jobs_t **jobs, int *last_return)
+{
+    jobs_t *tmp = NULL;
+    size_t pos = 0;
+    size_t start = !strcmp(args[0], JOBS_BG_CMD) ? 1 : 0;
+
+    do {
+        pos = 0;
+        if (is_empty_struct(*jobs, args, last_return))
+            return;
+        tmp = check_args_jobs(args, jobs, &pos, start);
+        if (!tmp) {
+            *last_return = 1;
+            return;
+        }
+        continue_process_bg(tmp, env);
+        if (tmp->state == DONE)
+            remove_element(jobs, pos);
+        if (!args[start])
+            break;
+        start++;
+    } while (args[start]);
 }
 
 void fg_command(char **args, const char **env, jobs_t **jobs, int *last_return)
 {
     jobs_t *tmp = NULL;
-    size_t i = 0;
+    size_t pos = 0;
+    size_t start = !strcmp(args[0], JOBS_FG_CMD) ? 1 : 0;
 
-    *last_return = 0;
-    if (is_empty_struct(*jobs, args, last_return))
-        return;
-    tmp = check_args_jobs(args, jobs, &i, JOBS_FG_CMD);
-    if (!tmp) {
-        *last_return = 1;
-        return;
-    }
-    continue_process(tmp, last_return, env, args);
-    if (tmp->state == DONE) {
-        remove_element(jobs, i);
-        if (!*jobs)
-            exit(84);
-    }
+    do {
+        pos = 0;
+        if (is_empty_struct(*jobs, args, last_return))
+            return;
+        tmp = check_args_jobs(args, jobs, &pos, start);
+        if (!tmp) {
+            *last_return = 1;
+            return;
+        }
+        continue_process(tmp, last_return, env, args);
+        if (tmp->state == DONE)
+            remove_element(jobs, pos);
+        if (!args[start])
+            break;
+        start++;
+    } while (args[start]);
 }
 
 void job_control_synonym(char **args, int *last_return, const char **env,

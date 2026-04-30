@@ -195,8 +195,10 @@ static char **execute_builtin(char **arg, char **copy_env, int *last_return,
 {
     char **result_env = NULL;
 
+    check_background_jobs(jobs);
     for (size_t i = 0; jobs_builtins[i].name; i++)
         if (!strcmp(jobs_builtins[i].name, arg[0])) {
+            *last_return = 0;
             jobs_builtins[i].ptr(arg, (const char **)(copy_env), jobs,
                 last_return);
             return copy_env;

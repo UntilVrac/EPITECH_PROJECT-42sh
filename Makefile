@@ -23,30 +23,31 @@ VALGRIND_FLAGS	=	--leak-check=full --show-leak-kinds=all
 
 
 
-SRC	=	bonus/print_error/str_tools_functions.c	\
-		bonus/print_error/search_into_str_functions.c	\
-		bonus/print_error/my_str_concat.c	\
-		bonus/print_error/file_tool_functions.c	\
-		bonus/print_error/get_env_dir.c	\
-		bonus/print_error/print_error.c	\
-		bonus/bonus.c	\
-		src/free_tools.c	\
-		src/tools.c	\
-		src/builtins/builtins.c	\
-		src/builtins/cd.c	\
-		src/builtins/env_utils.c	\
-		src/exec.c	\
-		src/jobs/get_jobs.c	\
-		src/jobs/jobs_control.c	\
-		src/jobs/manage_jobs.c	\
-		src/parsing.c	\
-		src/pipe.c	\
-		src/redirections.c	\
-		src/subshell.c	\
-		src/backticks.c	\
-		src/globbings/globbings.c	\
-		src/inhibitors.c	\
-		src/quote_inhibitor.c
+SRC			=	bonus/print_error/str_tools_functions.c				\
+				bonus/print_error/search_into_str_functions.c		\
+				bonus/print_error/my_str_concat.c					\
+				bonus/print_error/file_tool_functions.c				\
+				bonus/print_error/get_env_dir.c						\
+				bonus/print_error/print_error.c						\
+				bonus/bonus.c										\
+				src/free_tools.c									\
+				src/tools.c											\
+				src/builtins/builtins.c								\
+				src/builtins/cd.c									\
+				src/builtins/env_utils.c							\
+				src/exec.c											\
+				src/jobs/get_jobs.c									\
+				src/jobs/jobs_control.c								\
+				src/jobs/manage_jobs.c								\
+				src/jobs/jobs_struct.c								\
+				src/parsing.c										\
+				src/pipe.c											\
+				src/redirections.c									\
+				src/subshell.c										\
+				src/backticks.c										\
+				src/globbings/globbings.c							\
+				src/inhibitors.c									\
+				src/quote_inhibitor.c
 
 MAIN_SRC	=	src/main.c # main file
 

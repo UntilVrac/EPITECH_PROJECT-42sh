@@ -121,6 +121,8 @@ void execute_child(char **arg, char *path, char **copy_env)
     setpgid(0, 0);
     signal(SIGTSTP, SIG_DFL);
     signal(SIGINT, SIG_DFL);
+    signal(SIGTTIN, SIG_DFL);
+    signal(SIGTTOU, SIG_DFL);
     if (execve(path, arg, copy_env) == -1) {
         check_exec_error(arg, path, copy_env);
     }
@@ -181,13 +183,13 @@ void execute_command(char *command, char **copy_env, int *last_return,
         *last_return = 1;
     } else {
         pid = fork();
-        if (pid == 0)
+        if (pid == 0) {
+            free_jobs_struct(*jobs);
             execute_redirection_child(command, arg, path, copy_env);
-        else {
+        } else
             execute_parent(pid, last_return, (char **[]){copy_env, &command},
                 jobs);
-            free(path);
-        }
     }
+    free(path);
     free_array(arg);
 }
