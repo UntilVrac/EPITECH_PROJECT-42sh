@@ -36,7 +36,7 @@ static char *build_full_path(char *director, char *command)
     return full_path;
 }
 
-static char *check_path(char **directors, char *command, char *path_copy)
+static char *check_path(char **directors, char *command)
 {
     char *full_path = NULL;
 
@@ -48,13 +48,11 @@ static char *check_path(char **directors, char *command, char *path_copy)
         if (!full_path)
             break;
         if (access(full_path, X_OK) == 0) {
-            free(path_copy);
             free_array(directors);
             return full_path;
         }
         free(full_path);
     }
-    free(path_copy);
     free_array(directors);
     return NULL;
 }
@@ -62,21 +60,24 @@ static char *check_path(char **directors, char *command, char *path_copy)
 char *get_command_path(char *command, char **copy_env)
 {
     char *path = NULL;
-    char *path_copy = NULL;
     char **directors = NULL;
 
     if (command && (strchr((const char *)(command), '/')))
         return strdup((const char *)(command));
     path = get_path(copy_env);
-    if (path == NULL)
-        return NULL;
-    path_copy = strdup((const char *)(path));
-    directors = transform_to_string_array(path_copy, ":");
-    if (!directors) {
-        free(path_copy);
+    if (path == NULL) {
+        print_error(command, CMD_NOT_FOUND, (const char **)(copy_env));
         return NULL;
     }
-    return check_path(directors, command, path_copy);
+    directors = transform_to_string_array(path, ":");
+    if (!directors) {
+        print_error(command, CMD_NOT_FOUND, (const char **)(copy_env));
+        return NULL;
+    }
+    path = check_path(directors, command);
+    if (!path)
+        print_error(command, CMD_NOT_FOUND, (const char **)(copy_env));
+    return path;
 }
 
 void handle_signal_error(int status, int *last_return, const char **env)
@@ -123,13 +124,12 @@ void execute_child(char **arg, char *path, char **copy_env)
     signal(SIGINT, SIG_DFL);
     signal(SIGTTIN, SIG_DFL);
     signal(SIGTTOU, SIG_DFL);
-    if (execve(path, arg, copy_env) == -1) {
-        check_exec_error(arg, path, copy_env);
-    }
+    execve(path, arg, copy_env);
+    check_exec_error(arg, path, copy_env);
 }
 
 static void execute_parent(pid_t pid, int *last_return,
-    char ***array, jobs_t **jobs)
+    const char ***array, jobs_t **jobs)
 {
     int status = 0;
     const char **env = (const char **) array[0];
@@ -162,6 +162,7 @@ static void execute_redirection_child(const char *command, char **arg,
         exit(1);
     }
     arg = transform_to_string_array(command_copy, " \t");
+    arg = apply_globbings_on_args(arg, (const char **)(copy_env));
     free(command_copy);
     if (!arg || !arg[0])
         exit(0);
@@ -169,27 +170,26 @@ static void execute_redirection_child(const char *command, char **arg,
     exit(0);
 }
 
-void execute_command(char *command, char **copy_env, int *last_return,
-    jobs_t **jobs)
+void execute_command(const char *command, const char **env,
+    int *last_return, jobs_t **jobs)
 {
-    char *tmp_copy = strdup((const char *)(command));
-    char **arg = transform_to_string_array(tmp_copy, " \t");
-    char *path = get_command_path(arg[0], copy_env);
+    char **args = apply_globbings_on_args(transform_to_string_array(command,
+            " \t"), (const char **)(env));
+    char *path = get_command_path(args[0], (char **)(env));
     pid_t pid = 0;
 
-    free(tmp_copy);
-    if (path == NULL) {
-        print_error(arg[0], CMD_NOT_FOUND, (const char **)(copy_env));
+    if (!args || !path) {
         *last_return = 1;
-    } else {
-        pid = fork();
-        if (pid == 0) {
-            free_jobs_struct(*jobs);
-            execute_redirection_child(command, arg, path, copy_env);
-        } else
-            execute_parent(pid, last_return, (char **[]){copy_env, &command},
-                jobs);
+        nfree_array(1, args);
+        nfree(1, path);
+        return;
+    }
+    pid = fork();
+    if (pid == 0) {
+        free_jobs_struct(*jobs);
+        execute_redirection_child(command, args, path, (char **)(env));
     }
     free(path);
-    free_array(arg);
+    free_array(args);
+    execute_parent(pid, last_return, (const char **[]){env, &command}, jobs);
 }

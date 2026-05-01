@@ -60,6 +60,7 @@ static void process_command(char *cmd, char **env, int *last_return)
     char *cmd_copy = strdup(cmd);
     char **args = transform_to_string_array(cmd_copy, " \t");
 
+    args = apply_globbings_on_args(args, (const char **)(env));
     if (!args || !args[0]) {
         free(cmd_copy);
         exit(0);

@@ -70,7 +70,7 @@ char **apply_globbings_on_args(char **args, const char **env)
 
     if (args == NULL)
         return NULL;
-    for (size_t i = 0; args[i] != NULL; ++i)
+    for (size_t i = 1; args[i] != NULL; ++i)
         get_paths_with_globbings(&(args[i]), env);
     tmp = my_str_join(" ", (const char **)(args));
     free_array(args);

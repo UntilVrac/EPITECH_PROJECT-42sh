@@ -12,7 +12,7 @@
 #include "functions.h"
 #include "lang.h"
 
-static int ambiguous_redirect(char *command, const char **env)
+static int ambiguous_redirect(const char *command, const char **env)
 {
     int nb_input = 0;
     int nb_output = 0;
@@ -34,7 +34,7 @@ static int ambiguous_redirect(char *command, const char **env)
     return 0;
 }
 
-static int missing_name(char *command, int index, const char **env)
+static int missing_name(const char *command, int index, const char **env)
 {
     while (command[index] == ' ' || command[index] == '\t')
         index++;
@@ -46,7 +46,7 @@ static int missing_name(char *command, int index, const char **env)
     return 0;
 }
 
-static int redirection_syntax_error(char *command, const char **env)
+static int redirection_syntax_error(const char *command, const char **env)
 {
     int index = 0;
 
@@ -65,7 +65,7 @@ static int redirection_syntax_error(char *command, const char **env)
     return 0;
 }
 
-static char *get_filename(char *str)
+static char *get_filename(const char *str)
 {
     int i = 0;
     char *filename = NULL;
@@ -83,7 +83,7 @@ static char *get_filename(char *str)
     return filename;
 }
 
-static int get_output_fd(char *ptr, char **filename)
+static int get_output_fd(const char *ptr, char **filename)
 {
     int mode = O_WRONLY | O_CREAT;
     int jmp = 1;
@@ -93,15 +93,15 @@ static int get_output_fd(char *ptr, char **filename)
         mode = mode | O_APPEND;
     } else
         mode = mode | O_TRUNC;
-    *filename = get_filename(ptr + jmp);
+    *filename = get_filename((const char *)(ptr + jmp));
     if (!*filename)
         return -1;
-    return open(*filename, mode, 0644);
+    return open((const char *)(*filename), mode, 0644);
 }
 
-static int output_redirection(char *command)
+static int output_redirection(const char *command)
 {
-    char *ptr = strchr((const char *)(command), '>');
+    char *ptr = strchr(command, '>');
     char *filename = NULL;
     int fd = 0;
 
@@ -159,9 +159,9 @@ static int get_input_fd(char *ptr, char **filename)
     return fd;
 }
 
-static int input_redirection(char *command)
+static int input_redirection(const char *command)
 {
-    char *ptr = strchr((const char *)(command), '<');
+    char *ptr = strchr(command, '<');
     char *filename = NULL;
     int fd = 0;
 
@@ -180,7 +180,7 @@ static int input_redirection(char *command)
     return 0;
 }
 
-int apply_redirection(char *command, const char **env)
+int apply_redirection(const char *command, const char **env)
 {
     if (redirection_syntax_error(command, env) == -1)
         return -1;

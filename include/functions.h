@@ -47,8 +47,8 @@ char **execute_cd(char **arg, char **copy_env, int *last_return);
 char *get_command_path(char *command, char **copy_env);
 void handle_signal_error(int status, int *last_return, const char **env);
 void execute_child(char **arg, char *path, char **copy_env);
-void execute_command(char *command, char **copy_env, int *last_return,
-    jobs_t **jobs);
+void execute_command(const char *command, const char **copy_env,
+    int *last_return, jobs_t **jobs);
 // env_utils.c
 char *build_env_variable(char *name, char *value);
 int get_env_var_index(const char **copy_env, char *name);
@@ -69,7 +69,7 @@ char **process_line(char *line, char **copy_env, int *last_return,
 void handle_pipe(char *line, char **copy_env, int *last_return);
 int pipe_syntax_error(char *line);
 // redirections.c
-int apply_redirection(char *command, const char **env);
+int apply_redirection(const char *command, const char **env);
 // bonus.c
 void display_custom_prompt(char **copy_env);
 // tools.c
@@ -104,4 +104,4 @@ static const builtins_t builtins_functions[] = {
     {NULL, NULL}
 };
 
-#endif
+#endif /* FUNCTIONS_H_ */

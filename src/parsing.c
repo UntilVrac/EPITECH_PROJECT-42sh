@@ -223,24 +223,21 @@ static char **exec_all(char *command, char ***array,
     char **result_env = NULL;
 
     result_env = execute_builtin(arg, copy_env, last_return, jobs);
-    free_array(arg);
     if (result_env)
         return result_env;
-    execute_command(command, copy_env, last_return, jobs);
+    execute_command(command, (const char **)(copy_env), last_return, jobs);
     return copy_env;
 }
 
 static char **check_builtins(char *command, char ***array,
     int *last_return, jobs_t **jobs)
 {
-    char *command_copy = strdup((const char *)(command));
-    char **arg = transform_to_string_array(command_copy, " \t");
+    char **arg = transform_to_string_array((const char *)(command), " \t");
     char **copy_env = array[0];
     char **commands_array = array[1];
     jobs_t *tmp = *jobs;
 
     arg = apply_globbings_on_args(arg, NULL);
-    free(command_copy);
     if (!arg || !arg[0]) {
         free_array(arg);
         return copy_env;

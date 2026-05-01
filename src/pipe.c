@@ -62,21 +62,18 @@ static void redirect_pipe_fd(int in_fd, int out_fd)
 static void exec_pipe_child(char *command, int in_fd,
     int out_fd, char **copy_env)
 {
-    char *command_copy = strdup((const char *)(command));
     char **arg = NULL;
     char *path = NULL;
 
     redirect_pipe_fd(in_fd, out_fd);
-    if (apply_redirection(command_copy, (const char **)(copy_env)) == -1)
+    if (apply_redirection((const char *)(command), (const char **)(copy_env)) ==
+        -1)
         exit(1);
-    arg = transform_to_string_array(command_copy, " \t");
-    free(command_copy);
+    arg = transform_to_string_array((const char *)(command), " \t");
+    arg = apply_globbings_on_args(arg, (const char **)(copy_env));
     path = get_command_path(arg[0], copy_env);
-    if (path == NULL) {
-        print_error((const char *)(arg[0]), CMD_NOT_FOUND,
-            (const char **)(copy_env));
+    if (path == NULL)
         exit(1);
-    }
     execute_child(arg, path, copy_env);
 }
 
