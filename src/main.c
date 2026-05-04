@@ -8,6 +8,8 @@
 #include <string.h>
 #include "functions.h"
 #include "lang.h"
+#include "alias.h"
+
 
 static char **get_env_copy(char **env)
 {
@@ -28,23 +30,24 @@ static char **get_env_copy(char **env)
     return copy_env;
 }
 
-char **process_line(char *line, char **copy_env, int *last_return,
+char **process_line(void *data[], char **copy_env, int *last_return,
     jobs_t **jobs)
 {
     char **commands = NULL;
+    char *line = (char *)data[0];
     int len = strlen((const char *)(line));
 
     if (len > 0 && line[len - 1] == '\n')
         line[len - 1] = '\0';
     line = handle_backticks(line, last_return, jobs, copy_env);
-    commands = transform_to_string_array((const char *)(line), SEMICOLON);
+    commands = split_semicolon(line);
     if (line)
         free(line);
     if (!commands)
         return copy_env;
     for (int i = 0; commands[i] != NULL; i++)
-        copy_env = parse_command(commands[i], (char **[]) {copy_env, commands},
-            last_return, jobs);
+        copy_env = parse_command(commands[i],
+            (void *[]) {copy_env, data[1], commands, jobs}, last_return, jobs);
     free_array(commands);
     return copy_env;
 }
@@ -55,11 +58,21 @@ void print_exit(void)
         printf("exit\n");
 }
 
+static void clean_exit(jobs_t *jobs, char *line, alias_t *alias_list)
+{
+    print_exit();
+    free_alias_list(alias_list);
+    free_jobs_struct(jobs);
+    free(line);
+}
+
 static void read_input(char ***copy_env, int *last_return)
 {
     char *line = NULL;
     size_t line_length = 0;
     jobs_t *jobs = init_jobs_struct();
+    alias_t *alias_list = NULL;
+    void *data[2];
 
     if (!jobs) {
         free_array(*copy_env);
@@ -67,15 +80,14 @@ static void read_input(char ***copy_env, int *last_return)
     }
     while (1) {
         display_custom_prompt(*copy_env);
-        if (getline(&line, &line_length, stdin) == -1) {
-            print_exit();
+        if (getline(&line, &line_length, stdin) == -1)
             break;
-        }
-        *copy_env = process_line(line, *copy_env, last_return, &jobs);
+        data[0] = line;
+        data[1] = &alias_list;
+        *copy_env = process_line(data, *copy_env, last_return, &jobs);
         line = NULL;
     }
-    free_jobs_struct(jobs);
-    free(line);
+    clean_exit(jobs, line, alias_list);
 }
 
 int main(int argc, char **argv, char **env)

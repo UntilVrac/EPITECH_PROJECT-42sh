@@ -59,14 +59,16 @@ int is_name_valid(char *name, const char **env);
 char **add_to_env(char **copy_env, char *new_var);
 void detele_env_var(char **copy_env, int index);
 // parsing.c
-char **parse_command(char *command, char ***array, int *last_return,
+char **execute_builtin(char **arg, char **copy_env, int *last_return,
     jobs_t **jobs);
+char **parse_command(char *command, void *array[],
+    int *last_return, jobs_t **jobs);
 // main.c
 char **transform_to_string_array(const char *str, const char *separator);
 void my_replace_in_str(char *str, char c_init, char c_new);
 void free_array(char **arg);
 void print_exit(void);
-char **process_line(char *line, char **copy_env, int *last_return,
+char **process_line(void *data[], char **copy_env, int *last_return,
     jobs_t **jobs);
 // pipe.c
 void handle_pipe(char *line, char **copy_env, int *last_return);
@@ -78,7 +80,7 @@ void display_custom_prompt(char **copy_env);
 // tools.c
 char *cut_ending_char(char *buffer, char c);
 bool str_isnum(const char *str, int *val);
-// // char **split_semicolon(char *line);
+char **split_semicolon(char *line);
 // subshell.c
 void update_depth(char character, int *depth);
 int check_subshell(char *command, char **copy_env,

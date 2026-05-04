@@ -35,11 +35,11 @@ bool str_isnum(const char *str, int *val)
     return true;
 }
 
-/*static int count_semicolons(char *line)
+static int count_semicolons(char *line)
 {
     int count = 1;
     int depth = 0;
-//
+
     if (!line)
         return 0;
     for (int i = 0; line[i] != '\0'; i++) {
@@ -49,14 +49,14 @@ bool str_isnum(const char *str, int *val)
     }
     return count;
 }
-//
+
 char **split_semicolon(char *line)
 {
     int depth = 0;
     int start_pos = 0;
     int index = 0;
     char **commands = malloc(sizeof(char *) * (count_semicolons(line) + 1));
-//
+
     if (!commands || !line)
         return NULL;
     for (int i = 0; line[i] != '\0'; i++) {
@@ -72,4 +72,3 @@ char **split_semicolon(char *line)
     commands[index] = NULL;
     return commands;
 }
-*/

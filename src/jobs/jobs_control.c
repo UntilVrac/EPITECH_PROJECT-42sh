@@ -57,11 +57,15 @@ static void check_background_status(jobs_t *tmp, size_t pos, int status)
 
 void check_background_jobs(jobs_t **jobs)
 {
-    jobs_t *tmp = *jobs;
+    jobs_t *tmp = NULL;
     int status = 0;
-    pid_t pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
+    pid_t pid = 0;
     size_t i = 0;
 
+    if (jobs == NULL || *jobs == NULL)
+        return;
+    tmp = *jobs;
+    pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
     while (pid > 0) {
         i = get_jobs_by_pid(tmp, pid);
         if (tmp[i].state != EXITED && tmp[i].state != NULL_STATE)

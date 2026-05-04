@@ -64,6 +64,7 @@ static void exec_pipe_child(char *command, int in_fd,
 {
     char **arg = NULL;
     char *path = NULL;
+    int builtin_return = 0;
 
     redirect_pipe_fd(in_fd, out_fd);
     if (apply_redirection((const char *)(command), (const char **)(copy_env)) ==
@@ -71,6 +72,10 @@ static void exec_pipe_child(char *command, int in_fd,
         exit(1);
     arg = transform_to_string_array((const char *)(command), " \t");
     arg = apply_globbings_on_args(arg, (const char **)(copy_env));
+    if (execute_builtin(arg, copy_env, &builtin_return, NULL) != NULL) {
+        free_array(arg);
+        exit(builtin_return);
+    }
     path = get_command_path(arg[0], copy_env);
     if (path == NULL)
         exit(1);
