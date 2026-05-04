@@ -18,5 +18,9 @@ typedef struct alias_s {
 char *get_alias(alias_t *list, char *name);
 void add_alias(alias_t **list, char *name, char *command);
 void delete_alias(alias_t **list, char *name);
+void free_alias_list(alias_t *list);
+// alias_builtins.c
+int check_alias_builtin(char **arg, alias_t **alias_list);
+char **check_alias_expansion(char **arg, void *array[], int *last_return);
 
 #endif /* ALIAS_H_ */

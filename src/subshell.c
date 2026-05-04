@@ -7,6 +7,7 @@
 
 #include "functions.h"
 #include "lang.h"
+#include "alias.h"
 
 void update_depth(char character, int *depth)
 {
@@ -39,9 +40,15 @@ static void exec_child_subshell(char *content, char **copy_env,
     int *last_return, jobs_t **jobs)
 {
     char *subshell_command = strdup(content);
+    alias_t *alias_list = NULL;
+    void *data[2];
 
-    if (subshell_command)
-        process_line(subshell_command, copy_env, last_return, jobs);
+    if (!subshell_command)
+        exit(1);
+    data[0] = subshell_command;
+    data[1] = &alias_list;
+    process_line(data, copy_env, last_return, jobs);
+    free_alias_list(alias_list);
     exit(*last_return);
 }
 

@@ -66,3 +66,16 @@ void delete_alias(alias_t **list, char *name)
         prev = tmp;
     }
 }
+
+void free_alias_list(alias_t *list)
+{
+    alias_t *tmp = NULL;
+
+    while (list) {
+        tmp = list;
+        list = list->next_alias;
+        free(tmp->name);
+        free(tmp->command);
+        free(tmp);
+    }
+}
