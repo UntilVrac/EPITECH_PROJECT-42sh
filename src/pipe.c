@@ -60,11 +60,11 @@ static void redirect_pipe_fd(int in_fd, int out_fd)
     }
 }
 
-static char **get_arg_ready(char *command, void *data[], int *builtin_return)
+static char **get_arg_ready(char *command, void *data[])
 {
     char **arg = transform_to_string_array((const char *)(command), " \t");
     alias_t **list = (alias_t **)data[1];
-    char **expanded_arg = NULL;
+    char *expanded_arg = NULL;
     char *val = NULL;
 
     arg = apply_globbings_on_args(arg, (const char **)(data[0]));
@@ -92,7 +92,7 @@ static void exec_pipe_child(char *command, int in_fd,
     if (apply_redirection((const char *)(command),
             (const char **)(data[0])) == -1)
         exit(1);
-    arg = get_arg_ready(command, data, &builtin_return);
+    arg = get_arg_ready(command, data);
     if (execute_builtin(arg, (char **)data[0], &builtin_return, NULL) != NULL) {
         free_array(arg);
         exit(builtin_return);
