@@ -51,6 +51,7 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				src/quote_inhibitor.c								\
 				src/alias/alias_utils.c								\
 				src/alias/alias_builtins.c
+				src/line.c
 
 MAIN_SRC	=	src/main.c # main file
 

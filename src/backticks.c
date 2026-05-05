@@ -60,11 +60,13 @@ static void process_command(char *cmd, char **env, int *last_return)
     char *cmd_copy = strdup(cmd);
     char **args = transform_to_string_array(cmd_copy, " \t");
 
-    args = apply_globbings_on_args(args, (const char **)(env));
     if (!args || !args[0]) {
         free(cmd_copy);
         exit(0);
     }
+    args = apply_globbings_on_args(args, (const char **)(env));
+    if (apply_redirection(cmd, (const char **)env) == -1)
+        exit(1);
     for (size_t i = 0; builtins_functions[i].name; i++)
         if (!strcmp(args[0], builtins_functions[i].name)) {
             builtins_functions[i].ptr(args, env, last_return);
