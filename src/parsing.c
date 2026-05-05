@@ -284,7 +284,6 @@ char **parse_command(char *command, void *array[],
     alias_t **alias_list = (alias_t **)array[1];
     char **commands_array = (char **)array[2];
 
-    (void)alias_list;
     (void)commands_array;
     if (check_subshell(command, copy_env, last_return, jobs))
         return copy_env;
@@ -294,7 +293,7 @@ char **parse_command(char *command, void *array[],
             *last_return = 1;
             return copy_env;
         }
-        handle_pipe(command, copy_env, last_return);
+        handle_pipe(command, copy_env, last_return, alias_list);
         return copy_env;
     }
     return check_builtins(command, array, last_return, jobs);
