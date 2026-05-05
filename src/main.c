@@ -10,7 +10,6 @@
 #include "lang.h"
 #include "alias.h"
 
-
 static char **get_env_copy(char **env)
 {
     int i = 0;

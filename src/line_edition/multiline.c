@@ -39,3 +39,29 @@ void refresh_display(editor_t *editor, const char *prompt)
     move(cursor_row, cursor_col);
     refresh();
 }
+
+char *read_line(const char *prompt, char **env)
+{
+    int ch;
+    key_fn_t action;
+    editor_t *editor = {.buffer = calloc(256, 1), .len = 0, .cap = 256,
+        .cursor = 0};
+
+    init_editor();
+    init_bindings();
+    editor->prompt_len = strlen(prompt);
+    getyx(stdscr, editor->prompt_row, ch);
+    refresh_display(editor, prompt);
+    ch = getch();
+    while (ch != '\n' && ch != 4) {
+        action = find_bindkey(ch);
+        if (action)
+            action(editor, env);
+        else if (ch >= 32 && ch <= 126)
+            insert_char(editor, ch);
+        refresh_display(&editor, prompt);
+        ch = getch();
+    }
+    cleanup_editor();
+    return editor->buffer;
+}
