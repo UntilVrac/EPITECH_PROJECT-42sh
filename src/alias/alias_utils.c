@@ -24,6 +24,7 @@ char *get_alias(alias_t *list, char *name)
 void add_alias(alias_t **list, char *name, char *command)
 {
     alias_t *new_alias = NULL;
+    alias_t **current = list;
 
     for (alias_t *tmp = *list; tmp != NULL; tmp = tmp->next_alias) {
         if (strcmp(tmp->name, name) == 0) {
@@ -32,13 +33,15 @@ void add_alias(alias_t **list, char *name, char *command)
             return;
         }
     }
+    while (*current && strcmp((*current)->name, name) < 0)
+        current = &((*current)->next_alias);
     new_alias = malloc(sizeof(alias_t));
     if (!new_alias)
         return;
     new_alias->name = strdup(name);
     new_alias->command = strdup(command);
-    new_alias->next_alias = *list;
-    *list = new_alias;
+    new_alias->next_alias = *current;
+    *current = new_alias;
 }
 
 static void remove_alias_node(alias_t **list, alias_t *tmp, alias_t *prev)

@@ -21,6 +21,7 @@ void delete_alias(alias_t **list, char *name);
 void free_alias_list(alias_t *list);
 // alias_builtins.c
 int check_alias_builtin(char **arg, alias_t **alias_list);
+char *build_alias_command(char *alias_val, char **old_arg);
 char **check_alias_expansion(char **arg, void *array[], int *last_return);
 
 #endif /* ALIAS_H_ */

@@ -19,6 +19,7 @@
     #include <errno.h>
     #include <fcntl.h>
     #include "jobs.h"
+    #include "alias.h"
 
     #define SEMICOLON ";"
     #define GLOBBINGS_CHARS "*?[]"
@@ -71,7 +72,8 @@ void print_exit(void);
 char **process_line(void *data[], char **copy_env, int *last_return,
     jobs_t **jobs);
 // pipe.c
-void handle_pipe(char *line, char **copy_env, int *last_return);
+void handle_pipe(char *line, char **copy_env,
+    int *last_return, alias_t **alias_list);
 int pipe_syntax_error(char *line);
 // redirections.c
 int apply_redirection(const char *command, const char **env);

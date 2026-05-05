@@ -95,25 +95,34 @@ int check_alias_builtin(char **arg, alias_t **alias_list)
     return 0;
 }
 
-static char **handle_alias(char *alias_val, char **old_arg,
-    void *array[], int *last_return)
+char *build_alias_command(char *alias_val, char **old_arg)
 {
     int len = strlen(alias_val) + 1;
     char *new_command = NULL;
-    jobs_t **jobs = (jobs_t **)array[3];
-    char **result = NULL;
 
     for (int i = 1; old_arg[i] != NULL; i++)
         len += strlen(old_arg[i]) + 1;
     new_command = malloc(sizeof(char) * (len + 1));
     if (!new_command)
-        return (char **)array[0];
+        return NULL;
     strcpy(new_command, alias_val);
     for (int i = 1; old_arg[i] != NULL; i++) {
         strcat(new_command, " ");
         strcat(new_command, old_arg[i]);
     }
+    return new_command;
+}
+
+static char **handle_alias(char *alias_val, char **old_arg,
+    void *array[], int *last_return)
+{
+    jobs_t **jobs = (jobs_t **)array[3];
+    char *new_command = build_alias_command(alias_val, old_arg);
+    char **result = NULL;
+
     free_array(old_arg);
+    if (!new_command)
+        return (char **)array[0];
     result = parse_command(new_command, array, last_return, jobs);
     free(new_command);
     return result;
