@@ -5,6 +5,7 @@
 ** jobs_control
 */
 
+#include "lang.h"
 #include "functions.h"
 #include "jobs.h"
 
@@ -26,7 +27,7 @@ static const char *get_state(states_t state)
     }
 }
 
-static void print_jobs(jobs_t *jobs, size_t pos)
+static void print_jobs(jobs_t *jobs, size_t pos, bool show_pid)
 {
     char symbol = ' ';
 
@@ -36,8 +37,12 @@ static void print_jobs(jobs_t *jobs, size_t pos)
         symbol = '+';
     if (symbol != '+' && jobs[pos + 2].state == NULL_STATE)
         symbol = '-';
-    printf("[%zu] %c %s\t\t%s\n", jobs[pos].pos, symbol,
-        get_state(jobs[pos].state), jobs[pos].name);
+    if (show_pid)
+        printf("[%zu] %c\t%d %s\t\t%s\n", jobs[pos].pos, symbol, jobs[pos].pid,
+            get_state(jobs[pos].state), jobs[pos].name);
+    else
+        printf("[%zu] %c %s\t\t%s\n", jobs[pos].pos, symbol,
+            get_state(jobs[pos].state), jobs[pos].name);
 }
 
 static void check_background_status(jobs_t **jobs, size_t pos, int status)
@@ -52,7 +57,7 @@ static void check_background_status(jobs_t **jobs, size_t pos, int status)
             tmp[pos].state = BG_STOP_OUT;
     } else
         tmp[pos].state = DONE;
-    print_jobs(tmp, pos);
+    print_jobs(tmp, pos, false);
     if (tmp[pos].state == DONE)
         remove_element(jobs, pos);
 }
@@ -80,13 +85,18 @@ void jobs_command(char **args, const char **env, jobs_t **jobs_ptr,
     int *last_return)
 {
     jobs_t *jobs = *jobs_ptr;
+    size_t len = my_word_array_len((const char **)(args));
+    bool show_pid = false;
 
-    (void)args;
-    (void)env;
-    (void)last_return;
+    if (len >= 4) {
+        *last_return = 1;
+        return print_error("jobs", TOO_M_ARGS, env);
+    }
+    if (len > 1)
+        show_pid = true;
     for (size_t i = 0; jobs[i].state != NULL_STATE
         && jobs[i].state != EXITED; i++) {
-        print_jobs(jobs, i);
+        print_jobs(jobs, i, show_pid);
     }
 }
 
