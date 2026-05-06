@@ -191,46 +191,6 @@ char **transform_to_string_array(const char *str, const char *separator)
     return remove_empty_strings(arr, separator);
 }
 
-char **execute_builtin(char **arg, char **copy_env, int *last_return,
-    jobs_t **jobs)
-{
-    char **result_env = NULL;
-
-    check_background_jobs(jobs);
-    for (size_t i = 0; jobs_builtins[i].name; i++)
-        if (!strcmp(jobs_builtins[i].name, arg[0])) {
-            *last_return = 0;
-            jobs_builtins[i].ptr(arg, (const char **)(copy_env), jobs,
-                last_return);
-            return copy_env;
-        }
-    if (arg[0][0] == '%') {
-        job_control_synonym(arg, last_return, (const char **)(copy_env), jobs);
-        return copy_env;
-    }
-    for (size_t i = 0; builtins_functions[i].name; i++)
-        if (!strcmp(arg[0], builtins_functions[i].name)) {
-            result_env = builtins_functions[i].ptr(arg, copy_env, last_return);
-            return result_env;
-        }
-    return NULL;
-}
-
-static char **exec_all(char *command, char ***array,
-    int *last_return, jobs_t **jobs)
-{
-    char **copy_env = array[0];
-    char **arg = array[1];
-    char **result_env = NULL;
-
-    result_env = execute_builtin(arg, copy_env, last_return, jobs);
-    free_array(arg);
-    if (result_env)
-        return result_env;
-    execute_command(command, (const char **)(copy_env), last_return, jobs);
-    return copy_env;
-}
-
 static void update_job_state(jobs_t **jobs)
 {
     jobs_t *tmp = *jobs;
@@ -253,9 +213,21 @@ static char **handle_alias_logic(char **arg, void *array[], int *last_return)
     return NULL;
 }
 
+static char **exec_exit_builtin(void **array, char ***tmp, int *last_return,
+    void **structs)
+{
+    char **copy_env = tmp[0];
+    char **arg = tmp[1];
+
+    free_array(arg);
+    exit_program((char **)array[2], copy_env, *last_return, structs);
+    return copy_env;
+}
+
 static char **check_builtins(char *command, void *array[],
     int *last_return, jobs_t **jobs)
 {
+    history_t **history = (history_t **)array[4];
     char **arg = transform_to_string_array((const char *)(command), " \t");
     char **copy_env = (char **)array[0];
     char **res = NULL;
@@ -268,13 +240,12 @@ static char **check_builtins(char *command, void *array[],
     res = handle_alias_logic(arg, array, last_return);
     if (res)
         return res;
-    if (strcmp((const char *)(arg[0]), "exit") == 0) {
-        free_array(arg);
-        exit_program((char **)array[2], copy_env, *last_return, jobs);
-        return copy_env;
-    }
+    if (strcmp((const char *)(arg[0]), "exit") == 0)
+        return exec_exit_builtin(array, (char **[]){copy_env, arg}, last_return,
+            (void *[]){jobs, history});
     update_job_state(jobs);
-    return exec_all(command, (char **[]) {copy_env, arg}, last_return, jobs);
+    return exec_all(command, (char **[]) {copy_env, arg}, last_return,
+        (void *[]){jobs, history});
 }
 
 char **parse_command(char *command, void *array[],
@@ -283,9 +254,11 @@ char **parse_command(char *command, void *array[],
     char **copy_env = (char **)array[0];
     alias_t **alias_list = (alias_t **)array[1];
     char **commands_array = (char **)array[2];
+    history_t **history = (history_t **)array[4];
 
     (void)commands_array;
-    if (check_subshell(command, copy_env, last_return, jobs))
+    if (check_subshell(command, copy_env, last_return,
+            (void *[]){jobs, history}))
         return copy_env;
     if (strchr((const char *)(command), '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
@@ -293,7 +266,8 @@ char **parse_command(char *command, void *array[],
             *last_return = 1;
             return copy_env;
         }
-        handle_pipe(command, copy_env, last_return, alias_list);
+        handle_pipe(command, copy_env, last_return,
+            (void *[]){alias_list, history});
         return copy_env;
     }
     return check_builtins(command, array, last_return, jobs);

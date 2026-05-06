@@ -53,7 +53,10 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				src/alias/alias_builtins.c							\
 				src/line_edition/multiline.c						\
 				src/line_edition/binding.c							\
-				src/line_edition/actions.c
+				src/line_edition/actions.c							\
+				src/history/history.c								\
+				src/history/history_management.c						\
+				src/all_executions.c
 
 MAIN_SRC	=	src/main.c # main file
 

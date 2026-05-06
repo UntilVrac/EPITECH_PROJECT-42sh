@@ -84,6 +84,7 @@ static char **get_arg_ready(char *command, void *data[])
 static void exec_pipe_child(char *command, int in_fd,
     int out_fd, void *data[])
 {
+    history_t **history = (history_t **)data[2];
     char **arg = NULL;
     char *path = NULL;
     int builtin_return = 0;
@@ -93,7 +94,8 @@ static void exec_pipe_child(char *command, int in_fd,
             (const char **)(data[0])) == -1)
         exit(1);
     arg = get_arg_ready(command, data);
-    if (execute_builtin(arg, (char **)data[0], &builtin_return, NULL) != NULL) {
+    if (execute_builtin(arg, (char **)data[0], &builtin_return,
+            (void *[]){NULL, history}) != NULL) {
         free_array(arg);
         exit(builtin_return);
     }
@@ -161,14 +163,15 @@ static void wait_for_all(pid_t last_pid, int *last_return, int nb_commands,
 }
 
 void handle_pipe(char *line, char **copy_env,
-    int *last_return, alias_t **alias_list)
+    int *last_return, void **structs)
 {
+    alias_t **alias_list = (alias_t **)structs[0];
     char *copy_line = strdup((const char *)(line));
     char **commands = transform_to_string_array(copy_line, "|");
     int prev_fd = STDIN_FILENO;
     pid_t last_pid = 0;
     int nb_commands = 0;
-    void *data[2] = {copy_env, alias_list};
+    void *data[3] = {copy_env, alias_list, (history_t **)structs[1]};
 
     free(copy_line);
     if (!commands)

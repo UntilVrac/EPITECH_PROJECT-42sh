@@ -8,6 +8,8 @@
 #ifndef ALIAS_H_
     #define ALIAS_H_
 
+    #include "history.h"
+
 typedef struct alias_s {
     char *name;
     char *command;

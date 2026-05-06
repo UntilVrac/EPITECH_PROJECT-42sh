@@ -37,17 +37,17 @@ static char *get_subshell_content(const char *command)
 }
 
 static void exec_child_subshell(char *content, char **copy_env,
-    int *last_return, jobs_t **jobs)
+    int *last_return, void **structs)
 {
+    jobs_t **jobs = (jobs_t **)structs[0];
+    history_t **history = (history_t **)structs[1];
     char *subshell_command = strdup(content);
     alias_t *alias_list = NULL;
-    void *data[2];
 
     if (!subshell_command)
         exit(1);
-    data[0] = subshell_command;
-    data[1] = &alias_list;
-    process_line(data, copy_env, last_return, jobs);
+    process_line((void *[]){subshell_command, &alias_list, history},
+        copy_env, last_return, jobs);
     free_alias_list(alias_list);
     exit(*last_return);
 }
@@ -65,7 +65,7 @@ static void exec_parent_subshell(pid_t pid, int *last_return, char **copy_env)
 }
 
 static char **exec_subshell(char *content, char **copy_env,
-    int *last_return, jobs_t **jobs)
+    int *last_return, void **structs)
 {
     pid_t pid = fork();
 
@@ -74,7 +74,7 @@ static char **exec_subshell(char *content, char **copy_env,
         return copy_env;
     }
     if (pid == 0) {
-        exec_child_subshell(content, copy_env, last_return, jobs);
+        exec_child_subshell(content, copy_env, last_return, structs);
     } else {
         exec_parent_subshell(pid, last_return, copy_env);
     }
@@ -130,7 +130,7 @@ static int print_syntax_error(int syntax, int *last_return,
 }
 
 int check_subshell(char *command, char **copy_env,
-    int *last_return, jobs_t **jobs)
+    int *last_return, void **structs)
 {
     int syntax = check_syntax(command);
     char *subshell_content = NULL;
@@ -145,7 +145,7 @@ int check_subshell(char *command, char **copy_env,
     subshell_content = get_subshell_content(command);
     if (is_empty(subshell_content))
         return print_syntax_error(-3, last_return, subshell_content);
-    exec_subshell(subshell_content, copy_env, last_return, jobs);
+    exec_subshell(subshell_content, copy_env, last_return, structs);
     free(subshell_content);
     return 1;
 }

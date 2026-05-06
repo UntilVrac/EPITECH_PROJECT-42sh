@@ -9,6 +9,7 @@
 #include "functions.h"
 #include "lang.h"
 #include "alias.h"
+#include "history.h"
 
 static char **get_env_copy(char **env)
 {
@@ -32,6 +33,7 @@ static char **get_env_copy(char **env)
 char **process_line(void *data[], char **copy_env, int *last_return,
     jobs_t **jobs)
 {
+    history_t **history = (history_t **)data[2];
     char **commands = NULL;
     char *line = (char *)data[0];
     int len = strlen((const char *)(line));
@@ -45,8 +47,8 @@ char **process_line(void *data[], char **copy_env, int *last_return,
     if (!commands)
         return copy_env;
     for (int i = 0; commands[i] != NULL; i++)
-        copy_env = parse_command(commands[i],
-            (void *[]) {copy_env, data[1], commands, jobs}, last_return, jobs);
+        copy_env = parse_command(commands[i], (void *[]) {copy_env, data[1],
+                commands, jobs, history}, last_return, jobs);
     free_array(commands);
     return copy_env;
 }
@@ -71,19 +73,19 @@ static void read_input(char ***copy_env, int *last_return)
     size_t line_length = 0;
     jobs_t *jobs = init_jobs_struct();
     alias_t *alias_list = NULL;
-    void *data[2];
+    history_t **history = NULL;
 
     if (!jobs) {
         free_array(*copy_env);
         exit(84);
     }
-    while (1) {
+    for (size_t current = 0; 1;) {
         display_custom_prompt(*copy_env);
         if (getline(&line, &line_length, stdin) == -1)
             break;
-        data[0] = line;
-        data[1] = &alias_list;
-        *copy_env = process_line(data, *copy_env, last_return, &jobs);
+        history = add_command_to_history(history, line, &current);
+        *copy_env = process_line((void *[]){line, &alias_list, history},
+            *copy_env, last_return, &jobs);
         line = NULL;
     }
     clean_exit(jobs, line, alias_list);
