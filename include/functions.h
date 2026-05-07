@@ -29,6 +29,7 @@
     #define BACKSLASH '\\'
     #define SIMPLE_QUOTE '\''
     #define DOUBLE_QUOTE '\"'
+    #define MAX_BINDINGS 256
 
 typedef int signal_t;
 
@@ -37,17 +38,44 @@ static const signal_t ignored_signals[5] = {
 
 typedef struct builtins_s {
     char *name;
-    char **(*ptr)(char **, char **, int *);
+    char **(*ptr)(char **, char **, int *, void **);
 } builtins_t;
 
+
+typedef struct editor_s editor_t;
+
+typedef void (*key_fn_t)(editor_t *editor, char **env);
+
+typedef struct {
+    int key;
+    key_fn_t fn;
+} binding_t;
+
+typedef struct editor_s {
+    char *buffer;
+    int len;
+    int cap;
+    int cursor;
+    int prompt_len;
+    int prompt_row;
+    binding_t bindings[MAX_BINDINGS];
+    int b_count;
+} editor_t;
+
+// bindkey.c
+char **execute_bindkey(char **args, char **env, int *last_return,
+    void **structs);
 // builtins.c
-char **print_env(char **arg, char **env, int *last_return);
+char **print_env(char **arg, char **env, int *last_return, void **structs);
 void exit_program(char **commands_array, char **copy_env, int last_return,
     void **structs);
-char **execute_setenv(char **arg, char **copy_env, int *last_return);
-char **execute_unsetenv(char **arg, char **copy_env, int *last_return);
+char **execute_setenv(char **arg, char **copy_env, int *last_return,
+    void **structs);
+char **execute_unsetenv(char **arg, char **copy_env, int *last_return,
+    void **structs);
 // cd.c
-char **execute_cd(char **arg, char **copy_env, int *last_return);
+char **execute_cd(char **arg, char **copy_env, int *last_return,
+    void **structs);
 // exec.c
 char *get_command_path(char *command, char **copy_env);
 void handle_signal_error(int status, int *last_return, const char **env);
@@ -73,8 +101,7 @@ char **transform_to_string_array(const char *str, const char *separator);
 void my_replace_in_str(char *str, char c_init, char c_new);
 void free_array(char **arg);
 void print_exit(void);
-char **process_line(void *data[], char **copy_env, int *last_return,
-    jobs_t **jobs);
+char **process_line(void *data[], char **copy_env, int *last_return);
 // pipe.c
 void handle_pipe(char *line, char **copy_env,
     int *last_return, void **structs);
@@ -92,7 +119,7 @@ void update_depth(char character, int *depth);
 int check_subshell(char *command, char **copy_env,
     int *last_return, void **structs);
 // backticks.c
-char *handle_backticks(char *line, int *last_return, jobs_t **jobs,
+char *handle_backticks(char *line, int *last_return, void **structs,
     char **env);
 // globbings.c
 int get_paths_with_globbings(char **str, const char **env);
@@ -115,6 +142,7 @@ static const builtins_t builtins_functions[] = {
     {"env", print_env},
     {"setenv", execute_setenv},
     {"unsetenv", execute_unsetenv},
+    {"bindkey", execute_bindkey},
     {NULL, NULL}
 };
 

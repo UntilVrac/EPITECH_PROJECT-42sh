@@ -33,15 +33,16 @@ static char *get_cd_path(char **arg, char **copy_env)
     return path;
 }
 
-static char **update_oldpwd(char **copy_env, char *old_cwd)
+static char **update_oldpwd(char **copy_env, char *old_cwd, void **structs)
 {
     int ignore_return = 0;
     char *arg[4] = {"setenv", "OLDPWD", old_cwd, NULL};
 
-    return execute_setenv(arg, copy_env, &ignore_return);
+    (void)structs;
+    return execute_setenv(arg, copy_env, &ignore_return, structs);
 }
 
-static char **update_pwd(char **copy_env)
+static char **update_pwd(char **copy_env, void **structs)
 {
     int ignore_return = 0;
     char cwd[1024];
@@ -49,7 +50,7 @@ static char **update_pwd(char **copy_env)
 
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         arg[2] = cwd;
-        copy_env = execute_setenv(arg, copy_env, &ignore_return);
+        copy_env = execute_setenv(arg, copy_env, &ignore_return, structs);
     }
     return copy_env;
 }
@@ -73,7 +74,7 @@ static void display_correct_message(char *path, const char **env)
         print_error((const char *)(path), PERM_DENIED, env);
 }
 
-char **execute_cd(char **arg, char **copy_env, int *last_return)
+char **execute_cd(char **arg, char **copy_env, int *last_return, void **structs)
 {
     char *path = get_cd_path(arg, copy_env);
     char old_cwd[1024];
@@ -88,8 +89,8 @@ char **execute_cd(char **arg, char **copy_env, int *last_return)
         display_correct_message(path, (const char **)(copy_env));
         *last_return = 1;
     } else {
-        copy_env = update_oldpwd(copy_env, old_cwd);
-        copy_env = update_pwd(copy_env);
+        copy_env = update_oldpwd(copy_env, old_cwd, structs);
+        copy_env = update_pwd(copy_env, structs);
         *last_return = 0;
     }
     return copy_env;

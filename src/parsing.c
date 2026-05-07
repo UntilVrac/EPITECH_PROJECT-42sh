@@ -242,10 +242,10 @@ static char **check_builtins(char *command, void *array[],
         return res;
     if (strcmp((const char *)(arg[0]), "exit") == 0)
         return exec_exit_builtin(array, (char **[]){copy_env, arg}, last_return,
-            (void *[]){jobs, history});
+            (void *[]){array[1], history, jobs, array[5]});
     update_job_state(jobs);
     return exec_all(command, (char **[]) {copy_env, arg}, last_return,
-        (void *[]){jobs, history});
+        (void *[]){array[1], history, jobs, array[5]});
 }
 
 char **parse_command(char *command, void *array[],
@@ -258,7 +258,7 @@ char **parse_command(char *command, void *array[],
 
     (void)commands_array;
     if (check_subshell(command, copy_env, last_return,
-            (void *[]){jobs, history}))
+            (void *[]){alias_list, history, jobs, array[5]}))
         return copy_env;
     if (strchr((const char *)(command), '|') != NULL) {
         if (pipe_syntax_error(command) == -1) {
@@ -267,7 +267,7 @@ char **parse_command(char *command, void *array[],
             return copy_env;
         }
         handle_pipe(command, copy_env, last_return,
-            (void *[]){alias_list, history});
+            (void *[]){alias_list, history, jobs, array[5]});
         return copy_env;
     }
     return check_builtins(command, array, last_return, jobs);

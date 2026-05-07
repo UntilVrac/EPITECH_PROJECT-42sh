@@ -55,7 +55,8 @@ static void cmd_exec(char **args, char **env)
     }
 }
 
-static void process_command(char *cmd, char **env, int *last_return)
+static void process_command(char *cmd, char **env, int *last_return,
+    void **structs)
 {
     char *cmd_copy = strdup(cmd);
     char **args = transform_to_string_array(cmd_copy, " \t");
@@ -69,23 +70,21 @@ static void process_command(char *cmd, char **env, int *last_return)
         exit(1);
     for (size_t i = 0; builtins_functions[i].name; i++)
         if (!strcmp(args[0], builtins_functions[i].name)) {
-            builtins_functions[i].ptr(args, env, last_return);
+            builtins_functions[i].ptr(args, env, last_return, structs);
             exit(*last_return);
         }
     cmd_exec(args, env);
 }
 
-static void exec_child(int pipe_fds[2], char *cmd, int *last_return,
-    char **env)
+static void exec_child(int pipe_fds[2])
 {
     close(pipe_fds[0]);
     dup2(pipe_fds[1], STDOUT_FILENO);
     dup2(pipe_fds[1], STDERR_FILENO);
     close(pipe_fds[1]);
-    process_command(cmd, env, last_return);
 }
 
-static char *exec_cmd(char *cmd, int *last_return, char **env)
+static char *exec_cmd(char *cmd, int *last_return, char **env, void **structs)
 {
     int pipe_fds[2];
     pid_t pid;
@@ -95,8 +94,10 @@ static char *exec_cmd(char *cmd, int *last_return, char **env)
     if (pipe(pipe_fds) == -1)
         return strdup("");
     pid = fork();
-    if (pid == 0)
-        exec_child(pipe_fds, cmd, last_return, env);
+    if (pid == 0) {
+        exec_child(pipe_fds);
+        process_command(cmd, env, last_return, structs);
+    }
     close(pipe_fds[1]);
     output = read_output(pipe_fds[0]);
     close(pipe_fds[0]);
@@ -122,33 +123,41 @@ static char *construct_str(char *line, char *output, int start, int end)
     return res;
 }
 
-static char *replace_str(char *line, int start, int *last_return, char **env)
+static int find_end_backtick(char *line, int start)
 {
-    int end = -1;
-    char *cmd = NULL;
-    char *output = NULL;
-
     for (int i = start + 1; line[i]; i++)
-        if (line[i] == '`') {
-            end = i;
-            break;
-        }
-    if (end == -1)
-        return line;
-    cmd = strndup(line + start + 1, end - start - 1);
-    output = exec_cmd(cmd, last_return, env);
-    free(cmd);
-    return construct_str(line, output, start, end);
+        if (line[i] == '`')
+            return i;
+    return -1;
 }
 
-char *handle_backticks(char *line, int *last_return, jobs_t **jobs,
+static char *process_backtick(char *line, int indexes[2], int *last_return,
+    void **data)
+{
+    char **env = (char **)data[0];
+    void **structs = (void **)data[1];
+    char *cmd = strndup(line + indexes[0] + 1, indexes[1] - indexes[0] - 1);
+    char *output = exec_cmd(cmd, last_return, env, structs);
+
+    free(cmd);
+    return construct_str(line, output, indexes[0], indexes[1]);
+}
+
+char *handle_backticks(char *line, int *last_return, void **structs,
     char **env)
 {
-    (void)jobs;
-    for (int i = 0; line[i]; i++)
-        if (line[i] == '`') {
-            line = replace_str(line, i, last_return, env);
-            i = -1;
-        }
+    int indexes[2];
+    void *data[2] = {env, structs};
+
+    for (int i = 0; line[i]; i++) {
+        if (line[i] != '`')
+            continue;
+        indexes[0] = i;
+        indexes[1] = find_end_backtick(line, indexes[0]);
+        if (indexes[1] == -1)
+            return line;
+        line = process_backtick(line, indexes, last_return, data);
+        i = -1;
+    }
     return line;
 }

@@ -23,37 +23,26 @@
     #include "functions.h"
     #include "lang.h"
 
-    #define MAX_BINDINGS 256
-
-typedef struct editor_s editor_t;
-
-typedef void (*key_fn_t)(editor_t *editor, char **env);
-
 typedef struct {
-    int key;
+    char *name;
     key_fn_t fn;
-} binding_t;
-
-typedef struct editor_s {
-    char *buffer;
-    int len;
-    int cap;
-    int cursor;
-    int prompt_len;
-    int prompt_row;
-    binding_t bindings[MAX_BINDINGS];
-    int b_count;
-} editor_t;
+} map_t;
 
 // multiline.c
 void init_editor(void);
 void cleanup_editor(void);
 void refresh_display(editor_t *editor, const char *prompt);
-char *read_line(const char *prompt, char **env);
+char *read_line(const char *prompt, char **env, editor_t *editor);
+void free_editor(editor_t *editor);
 // binding.c
+const map_t *get_action_table(void);
 void add_bindkey(editor_t *editor, int key, key_fn_t fn);
 key_fn_t find_bindkey(editor_t *editor, int key);
 void init_bindings(editor_t *editor);
+void display_bindings(editor_t *editor);
+// binding_tools.c
+char *get_func_by_name(key_fn_t fn);
+int parse_key(char *key);
 // actions.c
 void move_left(editor_t *editor, char **env);
 void move_right(editor_t *editor, char **env);

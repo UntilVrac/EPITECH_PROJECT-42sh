@@ -24,7 +24,7 @@ void move_right(editor_t *editor, char **env)
 void delete_char(editor_t *editor, char **env)
 {
     (void)env;
-    if (editor->cursor == 0)
+    if (editor->cursor <= 0 || editor->len <= 0)
         return;
     memmove(editor->buffer + editor->cursor - 1, editor->buffer +
         editor->cursor, editor->len - editor->cursor);

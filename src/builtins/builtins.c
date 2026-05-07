@@ -8,9 +8,10 @@
 #include "functions.h"
 #include "lang.h"
 
-char **print_env(char **arg, char **copy_env, int *last_return)
+char **print_env(char **arg, char **copy_env, int *last_return, void **structs)
 {
     (void)arg;
+    (void)structs;
     for (size_t i = 0; copy_env[i] != NULL; i++) {
         printf("%s\n", copy_env[i]);
     }
@@ -53,13 +54,14 @@ static int fail_setenv(char **arg, int *last_return, const char **env)
     return 0;
 }
 
-char **execute_setenv(char **arg, char **copy_env, int *last_return)
+char **execute_setenv(char **arg, char **copy_env, int *last_return,
+    void **structs)
 {
     char *new_var = NULL;
     int index = 0;
 
     if (!arg[1])
-        return print_env(arg, copy_env, last_return);
+        return print_env(arg, copy_env, last_return, structs);
     if (fail_setenv(arg, last_return, (const char **)(copy_env)) == -1)
         return copy_env;
     *last_return = 0;
@@ -73,10 +75,12 @@ char **execute_setenv(char **arg, char **copy_env, int *last_return)
     return add_to_env(copy_env, new_var);
 }
 
-char **execute_unsetenv(char **arg, char **copy_env, int *last_return)
+char **execute_unsetenv(char **arg, char **copy_env, int *last_return,
+    void **structs)
 {
     int index = 0;
 
+    (void)structs;
     if (!arg[1]) {
         print_error("unsetenv", TOO_F_ARGS, (const char **)(copy_env));
         *last_return = 1;

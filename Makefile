@@ -33,6 +33,7 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				src/free_tools.c									\
 				src/tools.c											\
 				src/builtins/builtins.c								\
+				src/builtins/bindkey.c								\
 				src/builtins/cd.c									\
 				src/builtins/env_utils.c							\
 				src/exec.c											\
@@ -53,9 +54,10 @@ SRC			=	bonus/print_error/str_tools_functions.c				\
 				src/alias/alias_builtins.c							\
 				src/line_edition/multiline.c						\
 				src/line_edition/binding.c							\
+				src/line_edition/binding_tools.c					\
 				src/line_edition/actions.c							\
 				src/history/history.c								\
-				src/history/history_management.c						\
+				src/history/history_management.c					\
 				src/all_executions.c
 
 MAIN_SRC	=	src/main.c # main file

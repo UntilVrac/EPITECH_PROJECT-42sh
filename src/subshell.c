@@ -39,16 +39,17 @@ static char *get_subshell_content(const char *command)
 static void exec_child_subshell(char *content, char **copy_env,
     int *last_return, void **structs)
 {
-    jobs_t **jobs = (jobs_t **)structs[0];
-    history_t **history = (history_t **)structs[1];
     char *subshell_command = strdup(content);
-    alias_t *alias_list = NULL;
+    alias_t **alias_list = (alias_t **)structs[0];
+    history_t **history = (history_t **)structs[1];
+    jobs_t **jobs = (jobs_t **)structs[2];
+    editor_t *editor = (editor_t *)structs[3];
 
     if (!subshell_command)
         exit(1);
-    process_line((void *[]){subshell_command, &alias_list, history},
-        copy_env, last_return, jobs);
-    free_alias_list(alias_list);
+    process_line((void *[]){subshell_command, alias_list, history, jobs,
+            editor}, copy_env, last_return);
+    free_alias_list(*alias_list);
     exit(*last_return);
 }
 
