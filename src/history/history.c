@@ -9,6 +9,64 @@
 #include "functions.h"
 #include "history.h"
 
+static char *search_command_in_history(size_t nb, history_t **history)
+{
+    char *command = NULL;
+
+    for (size_t x = 0; history[x] != NULL; x++)
+        if (nb == history[x]->nb)
+            command = strdup(history[x]->command);
+    return command;
+}
+
+static char **exclamation_mark_management(char **commands, size_t index,
+    size_t index2, history_t **history)
+{
+    char *buff = NULL;
+    size_t nb = strtol(&commands[index][index2 + 1], &buff, 10);
+    char *new_command = NULL;
+
+    if (strlen(commands[index]) == 1)
+        return commands;
+    else if (buff[0] != '\0') {
+        fprintf(stderr, "%s: Event not found.\n", buff);
+        free_array(commands);
+        return NULL;
+    } else
+        new_command = search_command_in_history(nb, history);
+    if (!new_command) {
+        fprintf(stderr, "%zu: Event not found.\n", nb);
+        free_array(commands);
+        return NULL;
+    }
+    free(commands[index]);
+    commands[index] = new_command;
+    return commands;
+}
+
+char **check_exclamation_mark(history_t **history, char **commands)
+{
+    bool is_exc_mark_in_com = false;
+    size_t nb = 0;
+
+    if (!commands)
+        return NULL;
+    for (size_t x = 0; commands[x] != NULL; x++) {
+        for (; commands[x][nb] == ' ' || commands[x][nb] == '\t'; nb++);
+        if (commands[x][nb] == '!') {
+            is_exc_mark_in_com = true;
+            commands = exclamation_mark_management(commands, x, nb, history);
+        }
+        nb = 0;
+        if (!commands)
+            break;
+    }
+    if (commands && is_exc_mark_in_com == true)
+        for (size_t x = 0; commands[x] != NULL; x++)
+            printf("%s", commands[x]);
+    return commands;
+}
+
 void free_history_struct(history_t **history)
 {
     for (size_t x = 0; history[x] != NULL; x++) {

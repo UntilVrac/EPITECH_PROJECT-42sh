@@ -18,5 +18,6 @@ history_t **add_command_to_history(history_t **history, char *new_command,
     size_t *current);
 void history_management(const char **arg, history_t **history);
 void free_history_struct(history_t **history);
+char **check_exclamation_mark(history_t **history, char **commands);
 
 #endif /* HISTORY_H_ */

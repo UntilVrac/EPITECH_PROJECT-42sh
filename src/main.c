@@ -42,6 +42,7 @@ char **process_line(void *data[], char **copy_env, int *last_return,
         line[len - 1] = '\0';
     line = handle_backticks(line, last_return, jobs, copy_env);
     commands = split_semicolon(line);
+    commands = check_exclamation_mark(history, commands);
     if (line)
         free(line);
     if (!commands)
