@@ -17,7 +17,7 @@ char *get_path_with_home_dir(const char *str_init, const char **env)
     int home_index = 0;
     char **env_line = NULL;
 
-    if (strncmp(str_init, "~/", 2) != 0)
+    if (strncmp(str_init, "~/", 2) != 0 && strcmp(str_init, "~") != 0)
         return strdup(str_init);
     home_index = get_env_var_index(env, "HOME");
     if (home_index < 0)

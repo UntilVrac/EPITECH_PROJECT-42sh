@@ -244,7 +244,7 @@ char **check_builtins(char *command, void *array[],
     char **copy_env = (char **)array[0];
     char **res = NULL;
 
-    arg = apply_globbings_on_args(arg, NULL);
+    arg = apply_globbings_on_args(arg, (const char **)(array[0]));
     if (!arg || !arg[0]) {
         free_array(arg);
         return copy_env;
