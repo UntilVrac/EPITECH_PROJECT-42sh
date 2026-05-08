@@ -5,6 +5,7 @@
 ** Handling alias logic
 */
 
+#include <string.h>
 #include "functions.h"
 #include "lang.h"
 #include "jobs.h"
@@ -95,29 +96,36 @@ int check_alias_builtin(char **arg, alias_t **alias_list)
     return 0;
 }
 
-char *build_alias_command(char *alias_val, char **old_arg)
+char *build_alias_command(const char *alias_val, const char **old_arg)
 {
-    int len = strlen(alias_val) + 1;
-    char *new_command = NULL;
+    int size_alias = 0;
+    int size_old = my_word_array_len(old_arg);
+    char **arr = NULL;
+    char *str = NULL;
+    const char **alias =
+        (const char **)(transform_to_string_array(alias_val, " \t"));
 
-    for (int i = 1; old_arg[i] != NULL; i++)
-        len += strlen(old_arg[i]) + 1;
-    new_command = malloc(sizeof(char) * (len + 1));
-    if (!new_command)
+    if (!alias_val || !old_arg)
         return NULL;
-    strcpy(new_command, alias_val);
-    for (int i = 1; old_arg[i] != NULL; i++) {
-        strcat(new_command, " ");
-        strcat(new_command, old_arg[i]);
+    if (!alias) {
+        free_array((char **)(alias));
+        return NULL;
     }
-    return new_command;
+    size_alias = my_word_array_len(alias);
+    arr = calloc(size_alias + size_old + 1, sizeof(char *));
+    if (arr && cpy_string_arr(old_arg, arr, false, old_arg) &&
+        cpy_string_arr(&(alias[1]), &(arr[size_old]), true, old_arg))
+        str = my_str_join(" ", (const char **)(arr));
+    nfree_array(2, arr, alias);
+    return str;
 }
 
 static char **handle_alias(char *alias_val, char **old_arg,
     void *array[], int *last_return)
 {
     jobs_t **jobs = (jobs_t **)array[3];
-    char *new_command = build_alias_command(alias_val, old_arg);
+    char *new_command = build_alias_command(alias_val,
+        (const char **)(old_arg));
     char **result = NULL;
 
     free_array(old_arg);
@@ -126,16 +134,6 @@ static char **handle_alias(char *alias_val, char **old_arg,
     result = parse_command(new_command, array, last_return, jobs);
     free(new_command);
     return result;
-}
-
-static bool my_is_in_str_array(const char *str, const char **arr)
-{
-    if (!str || !arr)
-        return false;
-    for (size_t i = 0; arr[i] != NULL; ++i)
-        if (strcmp(str, arr[i]) == 0)
-            return true;
-    return false;
 }
 
 static bool must_alias_be_applied(char **args, const char *alias)
@@ -149,7 +147,8 @@ static bool must_alias_be_applied(char **args, const char *alias)
     if (strcmp(args[0], (const char *)(splited[0])) != 0)
         return false;
     for (size_t i = 1; splited[i] != NULL; ++i)
-        if (!my_is_in_str_array((const char *)(splited[i]), args)) {
+        if (!my_is_in_str_array((const char *)(splited[i]),
+                (const char **)(args))) {
             free_array(splited);
             return true;
         }
@@ -168,8 +167,4 @@ char **check_alias_expansion(char **arg, void *array[], int *last_return)
     if (must_alias_be_applied(arg, (const char *)(val)))
         return handle_alias(val, arg, array, last_return);
     return NULL;
-    if (strncmp(val, arg[0], name_len) == 0 &&
-        (val[name_len] == ' ' || val[name_len] == '\0'))
-        return NULL;
-    return handle_alias(val, arg, array, last_return);
 }

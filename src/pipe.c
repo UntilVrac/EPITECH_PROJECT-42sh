@@ -72,7 +72,8 @@ static char **get_arg_ready(char *command, const char **copy_env,
         return arg;
     val = get_alias(*list, arg[0]);
     if (val && strcmp(arg[0], val) != 0) {
-        expanded_arg = build_alias_command(val, arg);
+        expanded_arg = build_alias_command((const char *)(val),
+            (const char **)(arg));
         free_array(arg);
         arg = transform_to_string_array((const char *)expanded_arg, " \t");
         arg = apply_globbings_on_args(arg, copy_env);

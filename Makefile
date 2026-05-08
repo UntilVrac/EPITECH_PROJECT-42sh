@@ -23,41 +23,50 @@ VALGRIND_FLAGS	=	--leak-check=full --show-leak-kinds=all
 
 
 
-SRC			=	bonus/print_error/str_tools_functions.c				\
-				bonus/print_error/search_into_str_functions.c		\
-				bonus/print_error/my_str_concat.c					\
-				bonus/print_error/file_tool_functions.c				\
-				bonus/print_error/get_env_dir.c						\
-				bonus/print_error/print_error.c						\
-				bonus/bonus.c										\
-				src/free_tools.c									\
-				src/tools.c											\
-				src/builtins/builtins.c								\
-				src/builtins/cd.c									\
-				src/builtins/env_utils.c							\
-				src/exec.c											\
-				src/jobs/get_jobs.c									\
-				src/jobs/jobs_control.c								\
-				src/jobs/manage_jobs.c								\
-				src/jobs/jobs_struct.c								\
-				src/jobs/background.c								\
-				src/parsing.c										\
-				src/pipe.c											\
-				src/redirections.c									\
-				src/subshell.c										\
-				src/backticks.c										\
-				src/globbings/globbings.c							\
-				src/inhibitors.c									\
-				src/quote_inhibitor.c								\
-				src/alias/alias_utils.c								\
-				src/alias/alias_builtins.c							\
-				src/line_edition/multiline.c						\
-				src/line_edition/binding.c							\
-				src/line_edition/actions.c							\
-				src/history/history.c								\
-				src/history/history_management.c					\
-				src/all_executions.c								\
-				src/split.c
+SRC			=	$(addprefix bonus/,		\
+					bonus.c				\
+					$(addprefix print_error/,			\
+						print_error.c					\
+						str_tools_functions.c			\
+						search_into_str_functions.c		\
+						my_str_concat.c					\
+						file_tool_functions.c			\
+						get_env_dir.c))					\
+				$(addprefix src/,		\
+					free_tools.c		\
+					exec.c				\
+					tools.c				\
+					parsing.c			\
+					pipe.c				\
+					redirections.c		\
+					subshell.c			\
+					backticks.c			\
+					globbings.c			\
+					inhibitors.c		\
+					quote_inhibitor.c	\
+					all_executions.c	\
+					split.c				\
+					$(addprefix builtins/,		\
+						builtins.c				\
+						cd.c					\
+						env_utils.c)			\
+					$(addprefix jobs/,		\
+						get_jobs.c			\
+						jobs_control.c		\
+						manage_jobs.c		\
+						jobs_struct.c		\
+						background.c)		\
+					$(addprefix alias/,			\
+						alias_utils.c			\
+						alias_builtins.c		\
+						string_arr_tools.c)		\
+					$(addprefix line_edition/,		\
+						multiline.c					\
+						binding.c					\
+						actions.c)					\
+					$(addprefix history/,		\
+						history.c				\
+						history_management.c))
 
 MAIN_SRC	=	src/main.c # main file
 
