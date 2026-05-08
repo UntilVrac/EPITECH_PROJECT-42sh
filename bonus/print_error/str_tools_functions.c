@@ -24,7 +24,7 @@ char *my_substring(const char *str, int start_pos, unsigned int n)
     }
     if (end_pos > size)
         end_pos = size;
-    new_string = malloc(sizeof(char) * (n + 1));
+    new_string = calloc(n + 1, sizeof(char));
     if (new_string == NULL)
         return NULL;
     for (int i = start_pos; i < end_pos; ++i)
@@ -62,35 +62,20 @@ char **my_split_str(const char *str, char sep)
     const int size = strlen(str);
     int nbr_occ = my_nbr_occurences_in_str(sep, str);
     int verif = 0;
-    char **arr = malloc(sizeof(char *) * (nbr_occ + 2));
+    char **arr = calloc(nbr_occ + 2, sizeof(char *));
 
     if (arr == NULL)
         return NULL;
-    verif = set_array(arr, str, sep, size);
-    if (verif != EPITECH_SUCCESS)
-        return NULL;
+    if (nbr_occ == 0) {
+        arr[0] = strdup(str);
+        if (!(arr[0])) {
+            free(arr);
+            return NULL;
+        }
+    } else {
+        verif = set_array(arr, str, sep, size);
+        if (verif != EPITECH_SUCCESS)
+            return NULL;
+    }
     return arr;
 }
-
-// static void check_string_char(char str_i, char *chars, char *str_new,
-//     int *index)
-// {
-//     char c = chars[0];
-//     char c_new = chars[1];
-//
-//     if (str_i != c) {
-//         str_new[*index] = str_i;
-//         index = index + 1;
-//     } else if (str_i == c && c_new != '\0') {
-//         str_new[*index] = c_new;
-//         index = index + 1;
-//     }
-// }
-//
-// void my_replace_in_str(char *str, char c, char c_new)
-// {
-//     for (int i = 0; str[i] != '\0'; ++i) {
-//         if (str[i] == c)
-//             str[i] = c_new;
-//     }
-// }

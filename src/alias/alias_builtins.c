@@ -138,21 +138,25 @@ static char **handle_alias(char *alias_val, char **old_arg,
 
 static bool must_alias_be_applied(char **args, const char *alias)
 {
-    char **splited = transform_to_string_array(alias, " \t");
+    char **arr = transform_to_string_array(alias, " \t");
+    bool r_val = true;
 
-    if (!args)
+    if (!args || !arr) {
+        free_array(arr);
         return false;
-    if (!splited)
-        return false;
-    if (!splited[1])
-        return true;
-    for (size_t i = 1; splited[i] != NULL; ++i)
-        if (!my_is_in_str_array((const char *)(splited[i]),
-                (const char **)(args))) {
-            free_array(splited);
+    }
+    if (!(arr[1])) {
+        if (strcmp(arr[0], args[0]) == 0)
+            r_val = false;
+        free_array(arr);
+        return r_val;
+    }
+    for (size_t i = 1; arr[i] != NULL; ++i)
+        if (!my_is_in_str_array((const char *)(arr[i]), (const char **)args)) {
+            free_array(arr);
             return true;
         }
-    free_array(splited);
+    free_array(arr);
     return false;
 }
 
@@ -163,9 +167,7 @@ char **check_alias_expansion(char **arg, void *array[], int *last_return)
 
     if (!val || strcmp(arg[0], "alias") == 0)
         return NULL;
-    return handle_alias(val, arg, array, last_return);
     if (must_alias_be_applied(arg, (const char *)(val)))
         return handle_alias(val, arg, array, last_return);
-    printf("Not applied\n");
     return NULL;
 }
