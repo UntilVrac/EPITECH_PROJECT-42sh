@@ -128,6 +128,35 @@ static char **handle_alias(char *alias_val, char **old_arg,
     return result;
 }
 
+static bool my_is_in_str_array(const char *str, const char **arr)
+{
+    if (!str || !arr)
+        return false;
+    for (size_t i = 0; arr[i] != NULL; ++i)
+        if (strcmp(str, arr[i]) == 0)
+            return true;
+    return false;
+}
+
+static bool must_alias_be_applied(char **args, const char *alias)
+{
+    char **splited = transform_to_string_array(alias, " \t");
+
+    if (!args)
+        return false;
+    if (!splited)
+        return false;
+    if (strcmp(args[0], (const char *)(splited[0])) != 0)
+        return false;
+    for (size_t i = 1; splited[i] != NULL; ++i)
+        if (!my_is_in_str_array((const char *)(splited[i]), args)) {
+            free_array(splited);
+            return true;
+        }
+    free_array(splited);
+    return false;
+}
+
 char **check_alias_expansion(char **arg, void *array[], int *last_return)
 {
     alias_t **list = (alias_t **)array[1];
@@ -136,6 +165,9 @@ char **check_alias_expansion(char **arg, void *array[], int *last_return)
 
     if (!val || strcmp(arg[0], "alias") == 0)
         return NULL;
+    if (must_alias_be_applied(arg, (const char *)(val)))
+        return handle_alias(val, arg, array, last_return);
+    return NULL;
     if (strncmp(val, arg[0], name_len) == 0 &&
         (val[name_len] == ' ' || val[name_len] == '\0'))
         return NULL;
