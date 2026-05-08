@@ -132,8 +132,12 @@ char **check_alias_expansion(char **arg, void *array[], int *last_return)
 {
     alias_t **list = (alias_t **)array[1];
     char *val = get_alias(*list, arg[0]);
+    int name_len = strlen(arg[0]);;
 
-    if (val && strcmp(arg[0], "alias") != 0 && strcmp(arg[0], val) != 0)
-        return handle_alias(val, arg, array, last_return);
-    return NULL;
+    if (!val || strcmp(arg[0], "alias") == 0)
+        return NULL;
+    if (strncmp(val, arg[0], name_len) == 0 &&
+        (val[name_len] == ' ' || val[name_len] == '\0'))
+        return NULL;
+    return handle_alias(val, arg, array, last_return);
 }
