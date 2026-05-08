@@ -82,27 +82,29 @@ static char **get_arg_ready(char *command, const char **copy_env,
     return arg;
 }
 
-static void exec_pipe_child(char *command, int in_fd,
+static void exec_pipe_child(char *cmd, int in_fd,
     int out_fd, void *array[])
 {
     char **arg = NULL;
     char *path = NULL;
     int builtin_return = 0;
-    char **copy_env = (char **)array[0];
 
     redirect_pipe_fd(in_fd, out_fd);
-    if (apply_redirection((const char *)(command),
-            (const char **)copy_env) == -1)
+    if (apply_redirection((const char *)(cmd), (const char **)array[0]) == -1)
         exit(1);
-    arg = get_arg_ready(command, (const char **)copy_env, (alias_t **)array[1]);
+    arg = get_arg_ready(cmd, (const char **)array[0], (alias_t **)array[1]);
+    if (check_alias_builtin(arg, (alias_t **)array[1])) {
+        free_array(arg);
+        exit(0);
+    }
     if (execute_builtin(arg, &builtin_return, array) != NULL) {
         free_array(arg);
         exit(builtin_return);
     }
-    path = get_command_path(arg[0], copy_env);
+    path = get_command_path(arg[0], (char **)array[0]);
     if (path == NULL)
         exit(1);
-    execute_child(arg, path, copy_env);
+    execute_child(arg, path, (char **)array[0]);
 }
 
 static int setup_pipe(char **commands, int index, int *pipe_fd)
