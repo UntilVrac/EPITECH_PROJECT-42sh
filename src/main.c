@@ -10,6 +10,7 @@
 #include "lang.h"
 #include "alias.h"
 #include "history.h"
+// #include "graphic.h"
 
 static char **get_env_copy(char **env)
 {
@@ -24,7 +25,11 @@ static char **get_env_copy(char **env)
         exit(84);
     }
     for (int j = 0; j < i; j++) {
-        copy_env[j] = strdup((const char *)(env[j]));
+        if (strncmp(env[j], "PATH=", 5) == 0)
+            copy_env[j] = my_str_n_concat(4, env[j], ":", getcwd(NULL, 0),
+            "/bonus");
+        else
+            copy_env[j] = strdup((const char *)(env[j]));
     }
     copy_env[i] = NULL;
     return copy_env;
@@ -96,7 +101,23 @@ static void read_input(char ***copy_env, int *last_return)
     clean_exit(jobs, line, alias_list, history);
 }
 
-int main(int argc, char **argv, char **env)
+// static int parse_arguments(int ac, const char **av, bool *close_fd,
+//     const char **env)
+// {
+//     if (ac > MAX_ARG_NBR) {
+//         print_error("42sh", TOO_M_ARGS, env);
+//         return EPITECH_FAILURE;
+//     }
+//     if (ac == 0)
+//         return EPITECH_SUCCESS;
+//     if (strcmp(*av, CLOSE_FD_FLAG) == 0) {
+//         *close_fd = true;
+//         return EPITECH_SUCCESS;
+//     }
+//     print_error(*av, INVALID_ARG, env);
+//     return EPITECH_FAILURE;
+// }
+int main(int argc, const char **argv, char **env)
 {
     char **copy_env = get_env_copy(env);
     int last_return = 0;

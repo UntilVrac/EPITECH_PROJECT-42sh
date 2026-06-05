@@ -40,6 +40,7 @@ static const msg_name_t DEFAULT_MESSAGES[] = {
     "Ambiguous input redirect.",
     "Ambiguous output redirect.",
     "Missing name for redirect.",
+    "Invalid argument.",
     "Error"
 };
 
@@ -64,6 +65,7 @@ static const msg_name_t ERROR_MESSAGES[] = {
     "AMB_INPUT_RED",
     "AMB_OUTPUT_RED",
     "MISS_NAME_FOR_RED",
+    "INVALID_ARG",
     "DEFAULT",
     NULL};
 
@@ -88,6 +90,7 @@ enum err_msg_e {
     AMB_INPUT_RED,
     AMB_OUTPUT_RED,
     MISS_NAME_FOR_RED,
+    INVALID_ARG,
     DEFAULT
 } typedef err_msg_t;
 

@@ -19,4 +19,5 @@ NOT_EXEC=Erreur de format pour exec(). Mauvaise Architecture.
 AMB_INPUT_RED=Redirection d'entrée ambigue.
 AMB_OUTPUT_RED=Redirection de sortie ambigue.
 MISS_NAME_FOR_RED=Il manque un nom pour rediriger.
+INVALID_ARG=Argument invalide.
 DEFAULT=Erreur

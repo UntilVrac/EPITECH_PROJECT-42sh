@@ -19,4 +19,5 @@ NOT_EXEC=Exec format error. Binary file not executable.
 AMB_INPUT_RED=Ambiguous input redirect.
 AMB_OUTPUT_RED=Ambiguous output redirect.
 MISS_NAME_FOR_RED=Missing name for redirect.
+INVALID_ARG=Invalid argument.
 DEFAULT=Error

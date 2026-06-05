@@ -19,4 +19,5 @@ NOT_EXEC=Exec format error. Arquitectura errónea.
 AMB_INPUT_RED=Redirección de entrada ambigua.
 AMB_OUTPUT_RED=Redirección de salida ambigua.
 MISS_NAME_FOR_RED=Falta el nombre de la redirección.
+INVALID_ARG=Argumento no válido.
 DEFAULT=Error

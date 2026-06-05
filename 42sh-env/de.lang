@@ -19,4 +19,5 @@ NOT_EXEC=Exec format error. Falsche Architektur.
 AMB_INPUT_RED=Mehrdeutige Eingabeumlenkung.
 AMB_OUTPUT_RED=Mehrdeutige Ausgabeumlenkung.
 MISS_NAME_FOR_RED=Fehlender Name für Umlenkung.
+INVALID_ARG=Ungültiges argument.
 DEFAULT=Fehler
