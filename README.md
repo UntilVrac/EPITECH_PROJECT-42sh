@@ -11,6 +11,23 @@ The **42sh** is the outcome of the 'Shell Programming' module consisting to add 
 ### Code Breakers
 Project selectionned for the **Code Breakers 2026** => one of the 4 best 42sh of our promo.
 
-### Technologies
-- C (main part of the project)
-- Python (only for the barcode maker bonus)
+### Contributors
+- Alexis Guibert {[LinkedIn](https://www.linkedin.com/in/alexis-guibert-it/) / [Github](https://github.com/AGuibert07)}
+- Ana Varsami {[Github](https://github.com/anavarsami)}
+- Diana-Cristina Tararache {[Github](https://github.com/dianatrc)} (the 'minishell2' we started with is her)
+- Florian Dandeville {[Github](https://github.com/FloDand)}
+- Florian Dubois {[Github](https://github.com/Florian-Dubois)}
+
+### Installation
+First, clone this repository using
+```
+git clone git@github.com:AGuibert07/EPITECH_PROJECT-42sh.git
+```
+Then, compile the C code using the `make` command.
+
+### Usage
+You can run the 42sh shell using the `./42sh` command from the root of the repository.
+
+### Technologies Used
+- **Coding language**: C
+- **Barcode builder**: [Python](https://www.python.org) (Barcode Generated with the [TEC-IT](barcode.tec-it.com) one)
